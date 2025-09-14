@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lao Limheang</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="../image/pf1.jfif" type="image/icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+<body>
+
+     <header class="header">
+        <nav class="container nav">
+            <a href="#" class="logo">Lao Limheang</a>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#categories">Categories</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <div class="search-toggle">
+                <input type="text" id="search-input" placeholder="Search posts...">
+                <button id="dark-mode-toggle">🌙</button>
+            </div>
+        </nav>
+    </header>
+
+    <section id="home" class="hero">
+        <div class="container hero-content">
+            <h1>Welcome to my blog!</h1>
+            <div class="text-switch-container">I'm <span id="switch-text">developer</span><span class="cursor"></span></div>
+        </div>
+        <script>
+  const texts = [
+  "developer",
+  "coding",
+  "student",
+  "web developer",
+  "designer",
+  "frontend developer",
+  "backend developer",
+  "fullstack developer",
+  "programmer",
+  "tech enthusiast",
+  "AI learner",
+  "web designer",
+  "game developer",
+  "freelancer"
+];
+  let textIndex = 0;
+  let charIndex = 0;
+  const speed = 150; // typing speed
+  const switchTextElement = document.getElementById("switch-text");
+
+  function type() {
+    const currentText = texts[textIndex];
+    switchTextElement.textContent = currentText.slice(0, charIndex + 1);
+    charIndex++;
+    if(charIndex < currentText.length){
+      setTimeout(type, speed);
+    } else {
+      setTimeout(erase, 1000);
+    }
+  }
+
+  function erase() {
+    const currentText = texts[textIndex];
+    switchTextElement.textContent = currentText.slice(0, charIndex - 1);
+    charIndex--;
+    if(charIndex > 0){
+      setTimeout(erase, speed / 2);
+    } else {
+      textIndex = (textIndex + 1) % texts.length;
+      setTimeout(type, speed);
+    }
+  }
+
+  type();
+</script>
+    </section>
+
+    <section id="categories" class="blog-posts">
+        <div class="container">
+            <h2>Recent Posts</h2>
+            <div class="post-grid">
+                <article class="post-card">
+                    <img src="../image/laptop.jpg" alt="A laptop on a desk">
+                    <div class="card-content">
+                        <h3>Desktop & Laptop</h3>
+                        <p>Choosing between a Desktop or Laptop for a Developer depends on your needs. Desktops offer higher performance, while Laptops are more portable.</p>
+                        <a href="../html/Desktop.html" class="read-more">Read More</a>
+                    </div>
+                </article>
+                <article class="post-card">
+                    <img src="../image/cafe.jfif" alt="Coffee and a notebook">
+                    <div class="card-content">
+                        <h3>Courses</h3>
+                        <p>Learn coding officially through online platforms like Coursera, Udemy, or FreeCodeCamp.</p>
+                        <a href="../html/Courses.html" class="read-more">Read More</a>
+                    </div>
+                </article>
+                <article class="post-card">
+                    <img src="../image/code.jpg" alt="Coding on a computer screen">
+                    <div class="card-content">
+                        <h3>Coding</h3>
+                        <p>You can start coding in Python easily by learning basic Variables, Loops, and Functions.</p>
+                        <a href="../html/Coding.html" class="read-more">Read More</a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <div class="container about-content">
+            <img src="../image/pf1.jfif" alt="Author's profile picture" class="profile-img">
+            <div class="author-info">
+                <h2>About Me</h2>
+                <p>Hello! I'm Lao Limheang, a web designer passionate about creating beautiful, functional, and simple websites. This blog is my space to share what I've learned and to explore new ideas.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2>Get in Touch</h2>
+            <form id="contact-form" class="contact-form">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <textarea name="message" rows="5" placeholder="Your Message" required></textarea>
+                <button type="submit" class="submit-btn">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <div class="top">
+        <a href="#"><i class="fa fa-arrow-up"></i></a>
+    </div>
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Lao Limheang. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../javascript/main.js"></script>
+</body>
+</html>
