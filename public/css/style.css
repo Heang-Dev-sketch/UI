@@ -261,27 +261,16 @@ body {
     position: relative; /* ensures pseudo-element sits behind */
     z-index: 1;
     box-shadow: 0 0 30px #1565c0;
+    animation: 6s pf ease-in-out infinite;
+    padding: 5px;
 }
 
-/* Custom dashed border */
-.about-content::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    width: 170px; /* image width + 2*padding */
-    height: 170px;
-    border-radius: 50%;
-    border: 5px dashed cyan;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    animation: 6s pf ease-in-out infinite;
-}
 @keyframes pf {
     0%{
         border: 5px dashed cyan;
     }
     50%{
-        border: 5px dashed rgba(107, 107, 107, 0.178);
+        border: 5px dashed rgba(20, 20, 20, 0.377);
     }
     100%{
         border: 5px dashed cyan;
@@ -324,7 +313,9 @@ body {
 
 .submit-btn:hover {
     background-color: #1565c0;
-    transform: translateY(-2px);
+    transition: background-color 0.3s, transform 0.3s;
+    transform: translateY(-5px);
+    box-shadow: 0 6px 5px black;
 }
 
 /* --- Footer --- */
@@ -422,11 +413,14 @@ body {
 }
 
 /* switch */
+.text-switch-container #switch-text{
+    color: black;
+}
 .text-switch-container {
     font-size: 1.3rem;
     font-weight: bold;
     font-family: Arial, sans-serif;
-    color: #333;
+    color: white;
   }
   .cursor {
     display: inline-block;
@@ -451,4 +445,16 @@ body {
   .top a i{
     color: #1565c0;
     font-size: 15pt;
+  }
+  .social .media .social-media ul li a {
+    color: #1565c0;
+    font-size: 25px;
+  }
+  .social .media .social-media ul li{
+    list-style: none;
+  }
+  .social .media .social-media ul{
+    display: flex;
+    justify-content: center;
+    gap: 20px;
   }
