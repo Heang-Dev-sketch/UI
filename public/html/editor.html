@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive HTML & CSS Editor</title>
+    
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles for a polished look and animations */
+        html.dark {
+            color-scheme: dark;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Tailwind's gray-50 */
+        }
+
+        /* Nav link underline animation */
+        .nav-link {
+            position: relative;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: #4f46e5; /* Tailwind's indigo-600 */
+            transform-origin: bottom right;
+            transition: transform 0.25s ease-out;
+        }
+        
+        html.dark .nav-link::after {
+            background-color: #818cf8; /* Tailwind's indigo-400 */
+        }
+
+        .nav-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+        
+        /* Custom scrollbar for textareas */
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background: #e5e7eb; /* gray-200 */
+            border-radius: 10px;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background: #9ca3af; /* gray-400 */
+            border-radius: 10px;
+        }
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+
+        html.dark textarea::-webkit-scrollbar-track {
+            background: #374151; /* gray-700 */
+        }
+        html.dark textarea::-webkit-scrollbar-thumb {
+            background: #6b7280; /* gray-500 */
+        }
+        html.dark textarea::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; /* gray-400 */
+        }
+        
+        /* Smooth transition for the mobile menu */
+        #mobile-menu {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800 bg-gray-50 dark:bg-gray-900 dark:text-gray-200 transition-colors duration-300">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50 transition-colors duration-300">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                <a href="#">Code<span class="font-light">Lab</span></a>
+            </h1>
+            
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex space-x-8 items-center">
+                <a href="#" class="nav-link text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium">Home</a>
+                <a href="#" class="nav-link text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium">HTML</a>
+                <a href="#" class="nav-link text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium">CSS</a>
+                <a href="#" class="nav-link text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium">HTML+CSS</a>
+                <button class="dark-mode-toggle ml-4 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none">
+                    <svg class="sun-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="moon-icon w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden flex items-center">
+                <button class="dark-mode-toggle mr-4 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none">
+                    <svg class="sun-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="moon-icon w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                <button id="hamburger-button" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </nav>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 opacity-0 transform -translate-y-2">
+            <a href="desktop.html" class="block py-3 px-6 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 dark:text-gray-300 dark:hover:bg-gray-700">Home</a>
+            <a href="desktop.html" class="block py-3 px-6 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 dark:text-gray-300 dark:hover:bg-gray-700">HTML</a>
+            <a href="css.html" class="block py-3 px-6 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 dark:text-gray-300 dark:hover:bg-gray-700">CSS</a>
+            <a href="html-css.html" class="block py-3 px-6 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 dark:text-gray-300 dark:hover:bg-gray-700">HTML+CSS</a>
+        </div>
+    </header>
+
+    <!-- Main Interactive Area -->
+    <main class="container mx-auto p-4 md:p-6 lg:p-8">
+        <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transition-colors duration-300">
+            
+            <!-- Editor Panels -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <!-- HTML Panel -->
+                <div class="flex flex-col">
+                    <label for="html-code" class="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">HTML</label>
+                    <textarea id="html-code" class="w-full h-64 lg:h-96 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition duration-200 resize-none font-mono text-sm bg-white dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:placeholder-gray-400" spellcheck="false" placeholder="Type your HTML here..."></textarea>
+                </div>
+                
+                <!-- CSS Panel -->
+                <div class="flex flex-col">
+                    <label for="css-code" class="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">CSS</label>
+                    <textarea id="css-code" class="w-full h-64 lg:h-96 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition duration-200 resize-none font-mono text-sm bg-white dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:placeholder-gray-400" spellcheck="false" placeholder="Type your CSS here..."></textarea>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center justify-center space-x-4 my-6">
+                <button id="run-button" class="px-8 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-indigo-800 transform hover:scale-105 transition-all duration-200 shadow-md">
+                    Run Code
+                </button>
+                <button id="reset-button" class="px-6 py-3 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-500 dark:hover:bg-gray-600 dark:focus:ring-gray-800 transform hover:scale-105 transition-all duration-200 shadow-md">
+                    Reset
+                </button>
+            </div>
+
+            <!-- Live Preview -->
+            <div>
+                <h2 class="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">Live Preview</h2>
+                <div class="w-full h-[50vh] bg-white border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                    <iframe id="preview-panel" class="w-full h-full" sandbox="allow-scripts" title="Live Preview"></iframe>
+                </div>
+            </div>
+
+            <!-- How To Section -->
+            <div class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">How to Get Started</h2>
+                <div class="space-y-4 text-gray-600 dark:text-gray-400 prose prose-indigo dark:prose-invert">
+                    <p><strong class="font-medium text-gray-700 dark:text-gray-300">1. Write HTML:</strong> The left panel is for your HTML structure. Think of it as the skeleton of your webpage. Try adding a new tag like <code>&lt;h2&gt;My Second Heading&lt;/h2&gt;</code>.</p>
+                    <p><strong class="font-medium text-gray-700 dark:text-gray-300">2. Add CSS:</strong> The right panel is for CSS styles. This is how you add color, layout, and fonts. Try styling your new heading: <code>h2 { color: deepskyblue; }</code> in the CSS panel.</p>
+                    <p><strong class="font-medium text-gray-700 dark:text-gray-300">3. See the Result:</strong> Click the "Run Code" button. Your changes will instantly appear in the "Live Preview" panel above. Experiment and have fun!</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 mt-8">
+        <p class="text-gray-500 dark:text-gray-400">&copy; 2024 CodeLab. Created by Lao Limheang.</p>
+    </footer>
+    <script src="../javascript/code.js"></script>
+
+</body>
+</html>
+
