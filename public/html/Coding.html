@@ -3,95 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lao Limheang</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="icon" href="../image/pf1.jfif" type="image/icon">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>SkillSpark - Digital Learning Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f4f8;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
 
+        /* Custom scrollbar for a more polished look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e0e7ff;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4338ca;
+        }
+
+        /* Animation for page content transitions */
+        .page-enter {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hover effects for cards */
+        .course-card, .badge {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .course-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Custom focus styles for accessibility and aesthetics */
+        textarea:focus, button:focus, input:focus {
+            outline: 2px solid #6366f1;
+            outline-offset: 2px;
+        }
+        
+        /* Progress bar animation */
+        .progress-bar-inner {
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* Quiz answer feedback styles */
+        .quiz-option.correct {
+            background-color: #dcfce7 !important;
+            border-color: #22c55e !important;
+            color: #15803d;
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2 !important;
+            border-color: #ef4444 !important;
+            color: #b91c1c;
+        }
+        .quiz-option.selected {
+             background-color: #e0e7ff;
+             border-color: #4f46e5;
+        }
+        
+        /* Funky gradient text */
+        .gradient-text {
+            background: linear-gradient(45deg, #4f46e5, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+
+        /* Editor styles */
+        .code-editor {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            font-family: 'Courier New', Courier, monospace;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            height: 150px;
+            resize: vertical;
+        }
+
+        .code-editor-label {
+            position: absolute;
+            top: -0.75rem;
+            left: 1rem;
+            background-color: #1e293b;
+            color: #94a3b8;
+            padding: 0 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            max-width: 500px;
+            width: 90%;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-<body>
+<body class="antialiased">
+  <a href="index.html" class="fixed bottom-5 right-5 bg-green-500 text-white p-3 rounded z-50 hover:bg-green-600 transition inline-block text-center">
+  Go to Home page
+</a>
 
-     <header class="header">
-        <nav class="container nav">
-            <a href="#" class="logo">Lao Limheang</a>
-            <button class="menu-toggle" aria-label="Toggle navigation menu">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </button>
-            <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#categories">Categories</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-            <div class="search-toggle">
-                <input type="text" id="search-input" placeholder="Search posts...">
-                <button id="dark-mode-toggle">🌙</button>
+
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="#" id="home-link" class="flex items-center space-x-2">
+                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                <h1 class="text-2xl font-bold gradient-text">SkillSpark</h1>
+            </a>
+            <div class="flex items-center space-x-4">
+                <a href="#" id="dashboard-link" class="text-gray-600 hover:text-indigo-600 transition duration-300 font-semibold">Dashboard</a>
+                <a href="#" id="progress-link" class="text-gray-600 hover:text-indigo-600 transition duration-300 font-semibold">My Progress</a>
             </div>
         </nav>
     </header>
 
-    <section id="home" class="hero">
-        <div class="container hero-content">
-            <h1>Laoding....!</h1>
-            <div class="text-switch-container">I'm <span id="switch-text">developer</span><span class="cursor"></span></div>
-        </div>
-        <script>
-  const texts = [
-  "developer",
-  "coding",
-  "student",
-  "web developer",
-  "designer",
-  "frontend developer",
-  "backend developer",
-  "fullstack developer",
-  "programmer",
-  "tech enthusiast",
-  "AI learner",
-  "web designer",
-  "game developer",
-  "freelancer"
-];
-  let textIndex = 0;
-  let charIndex = 0;
-  const speed = 150; // typing speed
-  const switchTextElement = document.getElementById("switch-text");
-
-  function type() {
-    const currentText = texts[textIndex];
-    switchTextElement.textContent = currentText.slice(0, charIndex + 1);
-    charIndex++;
-    if(charIndex < currentText.length){
-      setTimeout(type, speed);
-    } else {
-      setTimeout(erase, 1000);
-    }
-  }
-
-  function erase() {
-    const currentText = texts[textIndex];
-    switchTextElement.textContent = currentText.slice(0, charIndex - 1);
-    charIndex--;
-    if(charIndex > 0){
-      setTimeout(erase, speed / 2);
-    } else {
-      textIndex = (textIndex + 1) % texts.length;
-      setTimeout(type, speed);
-    }
-  }
-
-  type();
-</script>
-
-    <div class="top">
-        <a href="#"><i class="fa fa-arrow-up"></i></a>
-    </div>
+    <!-- Main Content Area -->
+    <main id="main-content" class="container mx-auto p-4 md:p-8">
+        <!-- Content will be injected here by JavaScript -->
+    </main>
     
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-6 py-4 text-center">
+            <p>&copy; 2025 SkillSpark. Keep learning, keep growing!</p>
+        </div>
+    </footer>
 
-    <script src="../javascript/main.js"></script>
+    <!-- AI Modal -->
+    <div id="ai-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-xl font-bold gradient-text">Sparky is thinking...</h3>
+                <button id="close-modal-btn" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <div id="modal-body">
+                 <div class="flex justify-center items-center h-24">
+                    <div class="loading-spinner"></div>
+                 </div>
+            </div>
+        </div>
+    </div>
+    <script src="../javascript/server.js"></script>
 </body>
-
 </html>
+
