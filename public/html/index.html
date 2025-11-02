@@ -3,62 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Metadata -->
     <title>Lao Limheang - Personal Blog</title>
     <meta name="description" content="Welcome to the personal blog of Limheang, a passionate developer. Explore articles on technology, coding, AI, travel, and life adventures in Cambodia.">
     <meta name="keywords" content="Limheang, blog, developer, coding, technology, AI, Gemini, C++, HTML, CSS, JavaScript, Cambodia, Siem Reap, travel">
     <meta name="author" content="Limheang">
 
+    <!-- Open Graph (for social sharing) -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://heang-dev-sketch.github.io/UI/public/html/">
+    <meta property="og:url" content="https://heang-dev-sketch.github.io/UI/public/html/"> <!-- TODO: Update with actual URL when deployed -->
     <meta property="og:title" content="Limheang - Personal Blog">
     <meta property="og:description" content="A personal blog sharing thoughts on technology, coding, and life's adventures.">
     <meta property="og:image" content="https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=1200&auto=format&fit=crop">
-
+    
+    <!-- Twitter Card -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://your-blog-url.com/">
+    <meta property="twitter:url" content="https://heang-dev-sketch.github.io/UI/public/html/"> <!-- TODO: Update with actual URL when deployed -->
     <meta property="twitter:title" content="Limheang - Personal Blog">
     <meta property="twitter:description" content="A personal blog sharing thoughts on technology, coding, and life's adventures.">
     <meta property="twitter:image" content="https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=1200&auto=format&fit=crop">
 
-    <link rel="icon" href="../image/pf1.jfif" type="image/png">
+    <!-- Favicon (using a placeholder, replace with your `../image/pf1.jfif`) -->
+    <link rel="icon" href="httpsJ://placehold.co/32x32/4f46e5/ffffff?text=H" type="image/png">
+    
+    <!-- Scripts & Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 
+    <!-- Firebase Imports (Required for Visitor Counter) -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+      import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+      import { getFirestore, doc, getDoc, setDoc, increment, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+      // --- Firebase Config (Provided by environment) ---
+      let db, auth;
+      let isDbReady = false;
+      const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+      
+      try {
+        if (typeof __firebase_config !== 'undefined') {
+          const firebaseConfig = JSON.parse(__firebase_config);
+          const app = initializeApp(firebaseConfig);
+          db = getFirestore(app);
+          auth = getAuth(app);
+          
+          // Sign in the user
+          if (typeof __initial_auth_token !== 'undefined') {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+          
+          isDbReady = true;
+          console.log("Firebase initialized and user authenticated.");
+          
+          // Pass db instance to the main script
+          window.firebaseDb = db;
+          window.isFirebaseReady = true;
+          
+          // Dispatch an event to notify that Firebase is ready
+          document.dispatchEvent(new Event('firebaseReady'));
+          
+        } else {
+          throw new Error("Firebase config not found.");
+        }
+      } catch (error) {
+        console.error("Firebase connection error:", error.message);
+        window.isFirebaseReady = false;
+        // Show a non-blocking notification to the user
+        showDbErrorNotification("Error: Could not connect to database. Some features may not work.");
+      }
+
+      function showDbErrorNotification(message) {
+        let errorToast = document.getElementById('db-error-toast');
+        if (!errorToast) {
+          errorToast = document.createElement('div');
+          errorToast.id = 'db-error-toast';
+          errorToast.className = 'fixed bottom-5 right-5 bg-red-600 text-white py-3 px-5 rounded-lg shadow-lg z-[100]';
+          errorToast.textContent = message;
+          document.body.appendChild(errorToast);
+          
+          // Automatically hide after 5 seconds
+          setTimeout(() => {
+            errorToast.style.opacity = '0';
+            errorToast.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => errorToast.remove(), 500);
+          }, 5000);
+        }
+      }
+    </script>
+
+    <!-- Custom Styles -->
     <style>
         body {
+            /* Use Noto Sans Khmer as the default, Inter for English text */
             font-family: 'Noto Sans Khmer', sans-serif;
             transition: background-color 0.5s, color 0.5s;
         }
         
-        .font-english {
+        /* Apply Inter font for elements that should be in English */
+        .font-english, h1, h2, h3, h4, h5, h6, [data-lucide], .nav-link, button, input, label, textarea, .post-card .text-sm, .archive-link .text-sm {
             font-family: 'Inter', sans-serif;
-        }
-
-        :root {
-            --bg-light: #f1f5f9; /* slate-100 */
-            --text-light: #020617; /* slate-950 */
-            --card-light: #ffffff; /* white */
-            --border-light: #cbd5e1; /* slate-300 */
-            --primary: #4f46e5; /* indigo-600 */
-            --primary-hover: #4338ca; /* indigo-700 */
-
-            --bg-dark: #020617; /* slate-950 */
-            --text-dark: #f1f5f9; /* slate-100 */
-            --card-dark: #0f172a; /* slate-900 */
-            --border-dark: #334155; /* slate-700 */
-        }
-
-        html.light {
-            background-color: var(--bg-light);
-            color: var(--text-light);
-        }
-        
-        html.dark {
-            background-color: var(--bg-dark);
-            color: var(--text-dark);
         }
 
         /* Particles background */
@@ -83,7 +134,7 @@
             to { background-position: 200% center; }
         }
 
-        /* Page animation styles */
+        /* Page transition styles */
         .page { display: none; }
         .page.active {
             display: block;
@@ -94,8 +145,9 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Active nav link style */
         .nav-link.active {
-            color: var(--primary);
+            color: #4f46e5; /* primary */
             font-weight: 600;
         }
         
@@ -117,7 +169,7 @@
         
         /* Typing effect for hero subtitle */
         #typing-subtitle {
-            border-right: .15em solid var(--primary);
+            border-right: .15em solid #4f46e5; /* primary */
             white-space: nowrap;
             overflow: hidden;
             letter-spacing: .1em;
@@ -129,27 +181,82 @@
         }
         @keyframes blink-caret {
             from, to { border-color: transparent }
-            50% { border-color: var(--primary); }
+            50% { border-color: #4f46e5; }
         }
-
+        
+        /* Custom prose styles for blog posts */
+        .prose p {
+            margin-bottom: 1.25em;
+        }
+        .prose h2, .prose h3 {
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            font-weight: 700;
+        }
+        .prose ul, .prose ol {
+            margin-left: 1.5em;
+            margin-bottom: 1.25em;
+        }
+        .prose li > p {
+            margin-bottom: 0.5em;
+        }
+        .prose code {
+            background-color: #eef2ff; /* indigo-50 */
+            color: #4338ca; /* indigo-700 */
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .dark .prose code {
+            background-color: #312e81; /* indigo-900 */
+            color: #c7d2fe; /* indigo-200 */
+        }
+        .prose pre {
+            background-color: #1e293b; /* slate-800 */
+            color: #e2e8f0; /* slate-200 */
+            padding: 1em;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .prose pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: inherit;
+        }
+        .prose blockquote {
+            border-left: 4px solid #a5b4fc; /* indigo-300 */
+            padding-left: 1em;
+            font-style: italic;
+            color: #475569; /* slate-600 */
+        }
+        .dark .prose blockquote {
+            border-left-color: #6366f1; /* indigo-500 */
+            color: #94a3b8; /* slate-400 */
+        }
     </style>
     
+    <!-- Tailwind Config -->
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                        'khmer': ['Noto Sans Khmer', 'sans-serif']
+                    },
                     colors: {
                         primary: '#4f46e5',
                         'primary-hover': '#4338ca',
-                        'light-bg': '#f1f5f9',
-                        'light-text': '#020617',
-                        'light-card': '#ffffff',
-                        'light-border': '#cbd5e1',
-                        'dark-bg': '#020617',
-                        'dark-text': '#f1f5f9',
-                        'dark-card': '#0f172a',
-                        'dark-border': '#334155',
+                        'light-bg': '#f1f5f9',    // slate-100
+                        'light-text': '#020617',    // slate-950
+                        'light-card': '#ffffff',    // white
+                        'light-border': '#cbd5e1', // slate-300
+                        'dark-bg': '#020617',      // slate-950
+                        'dark-text': '#f1f5f9',    // slate-100
+                        'dark-card': '#0f172a',    // slate-900
+                        'dark-border': '#334155',  // slate-700
                     }
                 }
             }
@@ -158,101 +265,125 @@
 </head>
 <body class="bg-light-bg text-light-text dark:bg-dark-bg dark:text-dark-text antialiased">
     
+    <!-- Background -->
     <div id="particles-js"></div>
 
-    <header class="bg-light-card/80 dark:bg-dark-card/80 backdrop-blur-md border-b border-light-border/50 dark:border-dark-border/50 sticky top-0 z-50 shadow-sm font-english">
+    <!-- Header -->
+    <header class="bg-light-card/80 dark:bg-dark-card/80 backdrop-blur-md border-b border-light-border/50 dark:border-dark-border/50 sticky top-0 z-50 shadow-sm">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
                 <a href="#home" id="logo" class="flex items-center gap-3 text-3xl font-bold text-primary">
                     <i data-lucide="terminal-square"></i>
                     <span>HEANG.</span>
                 </a>
 
+                <!-- Desktop Navigation -->
                 <nav class="hidden md:flex items-center space-x-8">
-                    <a href="#home" class="nav-link text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition">Home</a>
-                    <a href="#categories" class="nav-link text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition">Categories</a>
-                    <a href="#ai-tool" class="nav-link text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition">AI Tool</a>
-                    <a href="#service" class="nav-link text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition">Service</a>
-                    <a href="#about" class="nav-link text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition">About</a>
-                    <a href="#contact" class="nav-link text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition">Contact</a>
-                    <a href="#archive" class="nav-link text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition">Archive</a>
+                    <a href="#home" class="nav-link text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors">Home</a>
+                    <a href="#categories" class="nav-link text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors">Categories</a>
+                    <a href="#ai-tool" class="nav-link text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors">AI Tool</a>
+                    <a href="#service" class="nav-link text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors">Service</a>
+                    <a href="#about" class="nav-link text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors">About</a>
+                    <a href="#contact" class="nav-link text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors">Contact</a>
+                    <a href="#archive" class="nav-link text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors">Archive</a>
                 </nav>
 
-                <div class="flex items-center space-x-4">
+                <!-- Actions -->
+                <div class="flex items-center space-x-2 sm:space-x-4">
                     <div class="relative hidden sm:block">
-                        <input id="search-bar" type="text" placeholder="Search posts..." class="w-48 pl-4 pr-8 py-2 rounded-full bg-light-bg dark:bg-dark-border border border-light-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300 focus:w-64">
-                        <i data-lucide="search" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                        <input id="search-bar" type="text" placeholder="Search posts..." class="w-48 pl-4 pr-8 py-2 rounded-full bg-light-bg dark:bg-dark-border border border-light-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 focus:w-64">
+                        <i data-lucide="search" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
                     </div>
-                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-light-border dark:hover:bg-dark-border transition transform hover:scale-110">
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-light-border dark:hover:bg-dark-border text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-all transform hover:scale-110">
                         <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
                         <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
                     </button>
-                    <button id="mobile-menu-button" class="md:hidden p-2 rounded-full hover:bg-light-border dark:hover:bg-dark-border transition">
+                    <button id="mobile-menu-button" class="md:hidden p-2 rounded-full hover:bg-light-border dark:hover:bg-dark-border text-slate-600 dark:text-slate-300 transition">
                         <i data-lucide="menu" class="w-6 h-6"></i>
                     </button>
                 </div>
             </div>
         </div>
-        <div id="mobile-menu" class="hidden md:hidden px-4 pb-4 space-y-2">
-             <div class="relative sm:hidden mb-4">
-                 <input id="mobile-search-bar" type="text" placeholder="Search posts..." class="w-full pl-4 pr-8 py-2 rounded-full bg-light-bg dark:bg-dark-border border border-light-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-primary">
-                 <i data-lucide="search" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-4 pb-4 space-y-2 border-t border-light-border/50 dark:border-dark-border/50">
+             <div class="relative sm:hidden my-4">
+                  <input id="mobile-search-bar" type="text" placeholder="Search posts..." class="w-full pl-4 pr-8 py-2 rounded-full bg-light-bg dark:bg-dark-border border border-light-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                  <i data-lucide="search" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
              </div>
-            <a href="#home" class="nav-link block py-2 text-gray-600 dark:text-gray-300 hover:text-primary">Home</a>
-            <a href="#categories" class="nav-link block py-2 text-gray-600 dark:text-gray-300 hover:text-primary">Categories</a>
-            <a href="#ai-tool" class="nav-link block py-2 text-gray-600 dark:text-gray-300 hover:text-primary">AI Tool</a>
-            <a href="#service" class="nav-link block py-2 text-gray-600 dark:text-gray-300 hover:text-primary">Service</a>
-            <a href="#about" class="nav-link block py-2 text-gray-600 dark:text-gray-300 hover:text-primary">About</a>
-            <a href="#contact" class="nav-link block py-2 text-gray-600 dark:text-gray-300 hover:text-primary">Contact</a>
-            <a href="#archive" class="nav-link block py-2 text-gray-600 dark:text-gray-300 hover:text-primary">Archive</a>
+            <a href="#home" class="nav-link block py-2 text-slate-600 dark:text-slate-300 hover:text-primary rounded-md">Home</a>
+            <a href="#categories" class="nav-link block py-2 text-slate-600 dark:text-slate-300 hover:text-primary rounded-md">Categories</a>
+            <a href="#ai-tool" class="nav-link block py-2 text-slate-600 dark:text-slate-300 hover:text-primary rounded-md">AI Tool</a>
+            <a href="#service" class="nav-link block py-2 text-slate-600 dark:text-slate-300 hover:text-primary rounded-md">Service</a>
+            <a href="#about" class="nav-link block py-2 text-slate-600 dark:text-slate-300 hover:text-primary rounded-md">About</a>
+            <a href="#contact" class="nav-link block py-2 text-slate-600 dark:text-slate-300 hover:text-primary rounded-md">Contact</a>
+            <a href="#archive" class="nav-link block py-2 text-slate-600 dark:text-slate-300 hover:text-primary rounded-md">Archive</a>
         </div>
     </header>
 
+    <!-- Main Content -->
     <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 relative z-10">
         
+        <!-- Home Page -->
         <div id="home" class="page active">
-            <section class="text-center mb-16 font-english fade-in-section">
-                <h1 class="text-4xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-400">Welcome to My Digital Space</h1>
+            <!-- Hero Section -->
+            <section class="text-center mb-16 py-10 fade-in-section">
+                <h1 class="text-4xl md:text-6xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-400">Welcome to My Digital Space</h1>
                 <div class="flex justify-center">
-                    <p id="typing-container" class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"><span id="typing-subtitle">Code, Creativity, and Cambodia.</span></p>
+                    <p id="typing-container" class="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto"><span id="typing-subtitle">Code, Creativity, and Cambodia.</span></p>
                 </div>
             </section>
 
+            <!-- Posts Section -->
             <section class="fade-in-section">
-                <h2 class="text-3xl font-bold mb-8">អត្ថបទ​ថ្មីៗ</h2>
-                <div id="latest-posts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Latest Posts (Default View) -->
+                <div id="latest-posts-container">
+                    <h2 class="text-3xl font-bold mb-8">អត្ថបទ​ថ្មីៗ</h2>
+                    <div id="latest-posts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                        <!-- Posts will be injected here by JS -->
                     </div>
+                </div>
+                
+                <!-- Search Results (Hidden by Default) -->
                  <div id="search-results-container" class="hidden">
-                      <h2 class="text-3xl font-bold mb-8">លទ្ធផល​ស្វែងរក</h2>
-                      <div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-                      <p id="no-results-message" class="text-center text-gray-500 hidden">រកមិនឃើញអត្ថបទដែលត្រូវគ្នានឹងការស្វែងរករបស់អ្នកទេ។</p>
+                       <h2 class="text-3xl font-bold mb-8">លទ្ធផល​ស្វែងរក</h2>
+                       <div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"></div>
+                       <p id="no-results-message" class="text-center text-slate-500 hidden py-10">រកមិនឃើញអត្ថបទដែលត្រូវគ្នានឹងការស្វែងរករបស់អ្នកទេ។</p>
                  </div>
             </section>
         </div>
         
+        <!-- Single Post Page -->
         <div id="single-post" class="page max-w-3xl mx-auto">
-            </div>
+            <!-- Single post content will be injected here by JS -->
+        </div>
 
+        <!-- Categories Page -->
         <div id="categories" class="page">
             <h1 class="text-4xl font-bold text-center mb-12 fade-in-section">ប្រភេទអត្ថបទ</h1>
-            <div id="category-filters" class="flex flex-wrap justify-center gap-4 mb-12 fade-in-section">
-                </div>
-            <div id="category-posts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                </div>
+            <div id="category-filters" class="flex flex-wrap justify-center gap-3 md:gap-4 mb-12 fade-in-section">
+                <!-- Category filters will be injected here by JS -->
+            </div>
+            <div id="category-posts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                <!-- Category posts will be injected here by JS -->
+            </div>
         </div>
         
+        <!-- AI Tool Page -->
         <div id="ai-tool" class="page max-w-3xl mx-auto">
              <div class="fade-in-section">
-                 <h1 class="text-4xl font-bold text-center mb-4">AI support.</h1>
-                 <p class="text-lg text-gray-600 dark:text-gray-400 text-center mb-12">បញ្ចូលប្រធានបទ ឬសំណួររបស់អ្នកខាងក្រោម ហើយចុចបង្កើតដើម្បីទទួលបានចម្លើយ។</p>
+                 <h1 class="text-4xl font-bold text-center mb-4 font-english">AI Assistant</h1>
+                 <!-- UPDATED: Changed text to reflect Gemini -->
+                 <p class="text-lg text-slate-600 dark:text-slate-400 text-center mb-12">Powered by Lao Limheang. Ask me anything!</p>
                  <div class="space-y-4">
-                     <textarea id="ai-prompt" rows="4" class="w-full p-4 rounded-md bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                     <textarea id="ai-prompt" rows="4" class="w-full p-4 rounded-lg bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="ឧទាហរណ៍៖ តើអ្វីជា API?"></textarea>
                      <div class="flex flex-col sm:flex-row gap-4">
-                         <button id="generate-ai-content" class="w-full py-3 px-4 bg-primary text-white font-semibold rounded-md hover:bg-primary-hover transition-transform transform hover:scale-105 flex items-center justify-center gap-2">
+                         <button id="generate-ai-content" class="w-full py-3 px-4 bg-primary text-white font-semibold rounded-lg hover:bg-primary-hover transition-transform transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center gap-2">
                              <i data-lucide="sparkles" class="w-5 h-5"></i>
                              <span>បង្កើត</span>
                          </button>
-                         <button id="random-prompt-btn" class="w-full sm:w-auto py-3 px-6 bg-light-border dark:bg-dark-border text-light-text dark:text-dark-text font-semibold rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2 font-english">
+                         <button id="random-prompt-btn" class="w-full sm:w-auto py-3 px-6 bg-light-border dark:bg-dark-border text-light-text dark:text-dark-text font-semibold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex items-center justify-center gap-2 font-english">
                              <i data-lucide="shuffle" class="w-5 h-5"></i>
                              <span>Random Script</span>
                          </button>
@@ -260,27 +391,30 @@
                  </div>
                  <div id="ai-loader" class="mt-8 text-center hidden">
                      <div role="status" class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-                     <p class="mt-2">...កំពុងដំណើរការ...</p>
+                     <p class="mt-2 text-slate-500">...កំពុងដំណើរការ...</p>
                  </div>
                  <div id="ai-result-container" class="mt-8 hidden">
                      <h2 class="text-2xl font-bold mb-4">លទ្ធផល៖</h2>
-                     <div id="ai-result" class="p-6 bg-light-border dark:bg-dark-border rounded-lg whitespace-pre-wrap"></div>
+                     <div id="ai-result" class="p-6 bg-light-border/60 dark:bg-dark-border/60 rounded-lg whitespace-pre-wrap leading-relaxed prose dark:prose-invert max-w-none"></div>
                  </div>
              </div>
-             <div class="mt-12 text-center p-6 bg-light-border dark:bg-dark-border rounded-lg fade-in-section">
-                 <h3 class="font-semibold mb-2 text-xl">ស្វែងយល់ពីឧបករណ៍ AI បន្ថែម</h3>
-                 <p class="text-gray-600 dark:text-gray-400 mb-4">ស្វែងយល់ពីបណ្តុំនៃគម្រោង AI និងហ្គេមដ៏គួរឱ្យរំភើបផ្សេងទៀត។</p>
-                 <a href="https://heang-dev-sketch.github.io/AI/game-hub/public/html/index.html" target="_blank" class="inline-flex items-center gap-2 bg-primary text-white font-semibold py-2 px-6 rounded-md hover:bg-primary-hover transition-transform transform hover:scale-105 font-english">
-                     <span>Explore Now</span>
-                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                 </a>
+             
+             <!-- Link to other projects -->
+             <div class="mt-16 text-center p-6 md:p-8 bg-light-card dark:bg-dark-card rounded-lg shadow-md border border-light-border dark:border-dark-border fade-in-section">
+                  <h3 class="font-semibold mb-2 text-xl">ស្វែងយល់ពីឧបករណ៍ AI បន្ថែម</h3>
+                  <p class="text-slate-600 dark:text-slate-400 mb-6">ស្វែងយល់ពីបណ្តុំនៃគម្រោង AI និងហ្គេមដ៏គួរឱ្យរំភើបផ្សេងទៀត។</p>
+                  <a href="https://heang-dev-sketch.github.io/AI/game-hub/public/html/index.html" target="_blank" class="inline-flex items-center gap-2 bg-primary text-white font-semibold py-2.5 px-6 rounded-lg hover:bg-primary-hover transition-transform transform hover:scale-105 shadow-md hover:shadow-lg font-english">
+                      <span>Explore Now</span>
+                      <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                  </a>
              </div>
         </div>
 
+        <!-- Service Page -->
         <div id="service" class="page max-w-4xl mx-auto">
             <div class="fade-in-section">
                 <h1 class="text-4xl font-bold text-center mb-4 font-english">My Services</h1>
-                <p class="text-lg text-gray-600 dark:text-gray-400 text-center mb-12">I offer professional services to help bring your digital ideas to life.</p>
+                <p class="text-lg text-slate-600 dark:text-slate-400 text-center mb-12">I offer professional services to help bring your digital ideas to life.</p>
                 
                 <div class="bg-light-card dark:bg-dark-card rounded-xl overflow-hidden shadow-lg border border-light-border dark:border-dark-border transform hover:-translate-y-2 transition-transform duration-300">
                     <div class="p-8 md:p-10">
@@ -291,12 +425,12 @@
                             <h2 class="text-3xl font-bold text-light-text dark:text-dark-text">Website Creation</h2>
                         </div>
                         
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">
+                        <p class="text-slate-600 dark:text-slate-300 mb-6 text-lg leading-relaxed">
                             I build modern, fast, and beautiful websites tailored to your needs. Whether you need a personal portfolio, a blog, or a small business site, I can create a high-quality digital presence for you.
                         </p>
                         
-                        <h3 class="text-xl font-semibold mb-3">What's Included:</h3>
-                        <ul class="space-y-3 text-gray-700 dark:text-gray-300 mb-8">
+                        <h3 class="text-xl font-semibold mb-4">What's Included:</h3>
+                        <ul class="space-y-3 text-slate-700 dark:text-slate-300 mb-8">
                             <li class="flex items-center gap-3">
                                 <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
                                 <span>Custom, responsive design that looks great on all devices.</span>
@@ -310,19 +444,20 @@
                                 <span>Fast performance and loading speeds.</span>
                             </li>
                              <li class="flex items-center gap-3">
-                                <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
-                                <span>Easy-to-manage content (if required).</span>
-                            </li>
+                                 <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
+                                 <span>Easy-to-manage content (if required).</span>
+                             </li>
                         </ul>
                         
-                        <a href="#contact" class="nav-link inline-flex items-center gap-2 bg-primary text-white font-semibold py-3 px-6 rounded-md hover:bg-primary-hover transition-transform transform hover:scale-105 font-english">
+                        <a href="#contact" class="nav-link inline-flex items-center gap-2 bg-primary text-white font-semibold py-3 px-6 rounded-lg hover:bg-primary-hover transition-transform transform hover:scale-105 shadow-md hover:shadow-lg font-english">
                             <span>Get a Free Quote</span>
                             <i data-lucide="arrow-right" class="w-4 h-4"></i>
                         </a>
                     </div>
                 </div>
 
-                <div class="mt-12 text-center text-gray-500 dark:text-gray-400 font-english fade-in-section">
+                <!-- Visitor Counter -->
+                <div class="mt-12 text-center text-slate-500 dark:text-slate-400 font-english fade-in-section">
                     <div class="flex items-center justify-center gap-2">
                         <i data-lucide="users" class="w-5 h-5"></i>
                         <span>Total Page Views: <span id="visitor-count" class="font-bold">...</span></span>
@@ -332,114 +467,157 @@
             </div>
         </div>
 
+        <!-- About Page -->
         <div id="about" class="page max-w-4xl mx-auto">
+            <!-- About Me Section -->
             <div class="fade-in-section">
                 <h1 class="text-4xl font-bold text-center mb-12">About Me</h1>
-                <div class="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
-                    <img src="../image/pf1.jfif" alt="Limheang" class="w-48 h-48 md:w-64 md:h-64 rounded-full object-cover shadow-lg transform hover:scale-105 transition-transform duration-300">
-                    <div class="text-lg text-gray-700 dark:text-gray-300 space-y-6 text-center md:text-left">
-                        <p>សួស្តី! ខ្ញុំឈ្មោះ Lao Limheang ជាអ្នកអភិវឌ្ឍន៍កម្មវិធីម្នាក់ដែលមានចិត្តស្រលាញ់ក្នុងការបង្កើតកម្មវិធីប្រកបដោយភាពច្នៃប្រឌិត និងមានប្រយោជន៍។ ដំណើររបស់ខ្ញុំក្នុងពិភពនៃការសរសេរកូដបានចាប់ផ្តើមជាមួយពាក្យ "Hello, World!" ហើយចាប់តាំងពីពេលនោះមក វាបានក្លាយជាចំណង់ចំណូលចិត្តពេញលេញក្នុងការអភិវឌ្ឍន៍វិបសាយ ការរៀនសូត្រពីម៉ាស៊ីន និងអ្វីៗគ្រប់យ៉ាងដែលពាក់ព័ន្ធ។</p>
+                <div class="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12 bg-light-card dark:bg-dark-card p-8 md:p-10 rounded-lg shadow-lg border border-light-border dark:border-dark-border">
+                    <img src="https://placehold.co/256x256/4f46e5/ffffff?text=Lao+Limheang" alt="Lao Limheang" class="w-48 h-48 md:w-64 md:h-64 rounded-full object-cover shadow-lg transform hover:scale-105 transition-transform duration-300 border-4 border-light-border dark:border-dark-border" onerror="this.src='https://placehold.co/256x256/4f46e5/ffffff?text=Lao+Limheang'">
+                    <div class="text-lg text-slate-700 dark:text-slate-300 space-y-6 text-center md:text-left">
+                        <p>សួស្តី! ខ្ញុំឈ្មោះ Lao Limheang ជាអ្នកអភិវឌ្ឍន៍កម្មវិធីម្នាក់ដែលមានចិត្តស្រលាញ់ក្នុងការបង្កើតកម្មវិធីប្រកបដោយភាពច្នៃប្រឌិត និងមានប្រយជន៍។ ដំណើររបស់ខ្ញុំក្នុងពិភពនៃការសរសេរកូដបានចាប់ផ្តើមជាមួយពាក្យ "Hello, World!" ហើយចាប់តាំងពីពេលនោះមក វាបានក្លាយជាចំណង់ចំណូលចិត្តពេញលេញក្នុងការអភិវឌ្ឍន៍វិបសាយ ការរៀនសូត្រពីម៉ាស៊ីន និងអ្វីៗគ្រប់យ៉ាងដែលពាក់ព័ន្ធ។</p>
                         <p>នៅពេលខ្ញុំមិនសរសេរកូដ អ្នកអាចរកខ្ញុំឃើញកំពុងដើរភ្នំ សាកល្បងរូបមន្តអាហារថ្មីៗក្នុងផ្ទះបាយ ឬអានសៀវភៅល្អៗ។ ប្លក់នេះគឺជាកន្លែងឌីជីថលរបស់ខ្ញុំ ជាកន្លែងសម្រាប់ចងក្រងឯកសារសិក្សារបស់ខ្ញុំ ចែករំលែកគម្រោងរបស់ខ្ញុំ និងភ្ជាប់ទំនាក់ទំនងជាមួយបុគ្គលដែលមានគំនិតដូចគ្នា។</p>
                         <p>សូមអរគុណសម្រាប់ការចូលមកទស្សនា!</p>
                     </div>
                 </div>
             </div>
+            
+             <!-- Skills Section -->
              <div id="skills-section" class="mt-16 fade-in-section">
-                 <h2 class="text-3xl font-bold text-center mb-8">Hard Skills</h2>
-                 <div class="max-w-2xl mx-auto space-y-6">
-                     <div>
-                         <div class="flex justify-between mb-1 font-english">
-                             <span class="text-base font-medium text-light-text dark:text-dark-text">HTML</span>
-                             <span class="text-sm font-medium text-light-text dark:text-dark-text">90%</span>
-                         </div>
-                         <div class="w-full bg-light-border rounded-full h-2.5 dark:bg-dark-border"><div class="progress-bar bg-emerald-500 h-2.5 rounded-full" data-width="90" style="width: 0%"></div></div>
-                     </div>
-                     <div>
-                         <div class="flex justify-between mb-1 font-english">
-                             <span class="text-base font-medium text-light-text dark:text-dark-text">CSS</span>
-                             <span class="text-sm font-medium text-light-text dark:text-dark-text">90%</span>
-                         </div>
-                         <div class="w-full bg-light-border rounded-full h-2.5 dark:bg-dark-border"><div class="progress-bar bg-emerald-500 h-2.5 rounded-full" data-width="90" style="width: 0%"></div></div>
-                     </div>
-                     <div>
-                         <div class="flex justify-between mb-1 font-english">
-                             <span class="text-base font-medium text-light-text dark:text-dark-text">C++</span>
-                             <span class="text-sm font-medium text-light-text dark:text-dark-text">20%</span>
-                         </div>
-                         <div class="w-full bg-light-border rounded-full h-2.5 dark:bg-dark-border"><div class="progress-bar bg-orange-500 h-2.5 rounded-full" data-width="20" style="width: 0%"></div></div>
-                     </div>
-                     <div>
-                         <div class="flex justify-between mb-1 font-english">
-                             <span class="text-base font-medium text-light-text dark:text-dark-text">JavaScript</span>
-                             <span class="text-sm font-medium text-light-text dark:text-dark-text">10%</span>
-                         </div>
-                         <div class="w-full bg-light-border rounded-full h-2.5 dark:bg-dark-border"><div class="progress-bar bg-red-500 h-2.5 rounded-full" data-width="10" style="width: 0%"></div></div>
-                     </div>
-                     <div>
-                         <div class="flex justify-between mb-1 font-english">
-                             <span class="text-base font-medium text-light-text dark:text-dark-text">ITE</span>
-                             <span class="text-sm font-medium text-light-text dark:text-dark-text">10%</span>
-                         </div>
-                         <div class="w-full bg-light-border rounded-full h-2.5 dark:bg-dark-border"><div class="progress-bar bg-red-500 h-2.5 rounded-full" data-width="10" style="width: 0%"></div></div>
-                     </div>
-                 </div>
+                  <h2 class="text-3xl font-bold text-center mb-10">Hard Skills</h2>
+                  <div class="max-w-3xl mx-auto space-y-7">
+                      
+                      <!-- HTML -->
+                      <div>
+                          <div class="flex justify-between mb-1 font-english">
+                              <span class="text-base font-medium text-light-text dark:text-dark-text">HTML</span>
+                              <span class="text-sm font-medium text-light-text dark:text-dark-text">90%</span>
+                          </div>
+                          <div class="w-full bg-light-border rounded-full h-2.5 dark:bg-dark-border overflow-hidden"><div class="progress-bar bg-emerald-500 h-2.5 rounded-full" data-width="90" style="width: 0%"></div></div>
+                      </div>
+                      
+                      <!-- CSS -->
+                      <div>
+                          <div class="flex justify-between mb-1 font-english">
+                              <span class="text-base font-medium text-light-text dark:text-dark-text">CSS</span>
+                              <span class="text-sm font-medium text-light-text dark:text-dark-text">90%</span>
+                          </div>
+                          <div class="w-full bg-light-border rounded-full h-2.5 dark:bg-dark-border overflow-hidden"><div class="progress-bar bg-emerald-500 h-2.5 rounded-full" data-width="90" style="width: 0%"></div></div>
+                      </div>
+
+                      <!-- C++ -->
+                      <div>
+                          <div class="flex justify-between mb-1 font-english">
+                              <span class="text-base font-medium text-light-text dark:text-dark-text">C++</span>
+                              <span class="text-sm font-medium text-light-text dark:text-dark-text">50%</span>
+                          </div>
+                          <div class="w-full bg-light-border rounded-full h-2.5 dark:bg-dark-border overflow-hidden"><div class="progress-bar bg-yellow-500 h-2.5 rounded-full" data-width="50" style="width: 0%"></div></div>
+                      </div>
+                      
+                      <!-- Tailwind CSS -->
+                      <div>
+                          <div class="flex justify-between mb-1 font-english">
+                              <span class="text-base font-medium text-light-text dark:text-dark-text">Tailwind CSS</span>
+                              <span class="text-sm font-medium text-light-text dark:text-dark-text">50%</span>
+                          </div>
+                          <div class="w-full bg-light-border rounded-full h-2.5 dark:bg-dark-border overflow-hidden"><div class="progress-bar bg-yellow-500 h-2.5 rounded-full" data-width="50" style="width: 0%"></div></div>
+                      </div>
+
+                      <!-- ITE -->
+                      <div>
+                          <div class="flex justify-between mb-1 font-english">
+                              <span class="text-base font-medium text-light-text dark:text-dark-text">ITE</span>
+                              <span class="text-sm font-medium text-light-text dark:text-dark-text">40%</span>
+                          </div>
+                          <div class="w-full bg-light-border rounded-full h-2.5 dark:bg-dark-border overflow-hidden"><div class="progress-bar bg-orange-500 h-2.5 rounded-full" data-width="40" style="width: 0%"></div></div>
+                      </div>
+                      
+                      <!-- JavaScript -->
+                      <div>
+                          <div class="flex justify-between mb-1 font-english">
+                              <span class="text-base font-medium text-light-text dark:text-dark-text">JavaScript</span>
+                              <span class="text-sm font-medium text-light-text dark:text-dark-text">20%</span>
+                          </div>
+                          <div class="w-full bg-light-border rounded-full h-2.5 dark:bg-dark-border overflow-hidden"><div class="progress-bar bg-red-500 h-2.5 rounded-full" data-width="20" style="width: 0%"></div></div>
+                      </div>
+
+                  </div>
              </div>
         </div>
 
-        <div id="contact" class="page max-w-2xl mx-auto font-english">
+        <!-- Contact Page -->
+        <div id="contact" class="page max-w-2xl mx-auto">
              <div class="fade-in-section">
-                 <h1 class="text-4xl font-bold text-center mb-4">Contact Me</h1>
-                 <p class="text-lg text-gray-600 dark:text-gray-400 text-center mb-12">Have a question or want to work together? Feel free to reach out.</p>
+                 <h1 class="text-4xl font-bold text-center mb-4 font-english">Contact Me</h1>
+                 <p class="text-lg text-slate-600 dark:text-slate-400 text-center mb-12">Have a question or want to work together? Fill out the form below.</p>
              </div>
-             <div class="space-y-6 fade-in-section">
-                 <div class="bg-light-card dark:bg-dark-card p-6 rounded-lg shadow-md flex items-center space-x-6 transform hover:-translate-y-1 transition-transform">
-                     <i data-lucide="mail" class="w-8 h-8 text-primary"></i>
-                     <div>
-                         <h3 class="font-semibold text-lg">Email</h3>
-                         <a href="mailto:therealheang@gmail.com" class="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors">therealheang@gmail.com</a>
-                     </div>
+             
+             <!-- Contact Form -->
+             <form id="contactForm" class="space-y-6 fade-in-section">
+                 <div>
+                     <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Full Name</label>
+                     <input type="text" id="name" name="name" required class="w-full p-3 rounded-lg bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
                  </div>
-                 <div class="bg-light-card dark:bg-dark-card p-6 rounded-lg shadow-md flex items-center space-x-6 transform hover:-translate-y-1 transition-transform">
-                     <i data-lucide="phone" class="w-8 h-8 text-primary"></i>
-                     <div>
-                         <h3 class="font-semibold text-lg">Phone</h3>
-                         <a href="tel:0975424470" class="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors">097 542 4470</a>
-                     </div>
+                  <div>
+                     <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email</label>
+                     <input type="email" id="email" name="email" required class="w-full p-3 rounded-lg bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
                  </div>
-             </div>
-
-             <div class="mt-12 text-center fade-in-section">
-                 <p class="mb-6">Find me on social media</p>
+                 <div>
+                     <label for="message" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Message</label>
+                     <textarea id="message" name="message" rows="5" required class="w-full p-3 rounded-lg bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"></textarea>
+                 </div>
+                 <div>
+                     <button type="submit" id="submit-btn" class="w-full py-3 px-6 bg-primary text-white font-semibold rounded-lg hover:bg-primary-hover transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-75 shadow-md hover:shadow-lg">
+                         <span id="submit-text">Send Message</span>
+                         <i id="submit-loader" data-lucide="loader-2" class="w-5 h-5 animate-spin hidden"></i>
+                     </button>
+                 </div>
+             </form>
+             
+             <!-- Social Links -->
+             <div class="mt-16 text-center fade-in-section">
+                 <p class="mb-6 text-slate-500">Find me on social media</p>
                  <div class="flex justify-center space-x-8">
-                     <a href="https://t.me/CodeCraft_Studio_CCS" target="_blank" class="text-gray-500 hover:text-primary transition-colors transform hover:scale-125"><i data-lucide="send" class="w-10 h-10"></i></a>
-                     <a href="https://www.facebook.com/lee.minh.heang.2025" target="_blank" class="text-gray-500 hover:text-primary transition-colors transform hover:scale-125"><i data-lucide="facebook" class="w-10 h-10"></i></a>
-                     <a href="https://heang-dev-sketch.github.io/UI/public/html/index.html" target="_blank" class="text-gray-500 hover:text-primary transition-colors transform hover:scale-125"><i data-lucide="globe" class="w-10 h-10"></i></a>
+                     <a href="https://t.me/CodeCraft_Studio_CCS" target="_blank" class="text-slate-500 hover:text-primary transition-colors transform hover:scale-125"><i data-lucide="send" class="w-10 h-10"></i></a>
+                     <a href="https://www.facebook.com/lee.minh.heang.2025" target="_blank" class="text-slate-500 hover:text-primary transition-colors transform hover:scale-125"><i data-lucide="facebook" class="w-10 h-10"></i></a>
+                     <a href="https://heang-dev-sketch.github.io/UI/public/html/index.html" target="_blank" class="text-slate-500 hover:text-primary transition-colors transform hover:scale-125"><i data-lucide="globe" class="w-10 h-10"></i></a>
                  </div>
              </div>
         </div>
 
-        <div id="archive" class="page font-english">
+        <!-- Archive Page -->
+        <div id="archive" class="page max-w-4xl mx-auto">
             <h1 class="text-4xl font-bold text-center mb-12 fade-in-section">Post Archive</h1>
             <div id="archive-list" class="space-y-10 fade-in-section">
-                </div>
+                <!-- Archive list will be injected here by JS -->
+            </div>
         </div>
     </main>
 
+    <!-- Footer -->
     <footer class="bg-light-card/80 dark:bg-dark-card/80 border-t border-light-border/50 dark:border-dark-border/50 mt-16 relative z-10">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
-                <p class="text-gray-500 dark:text-gray-400 font-english">&copy; 2025 Limheang. All Rights Reserved.</p>
+                <p class="text-slate-500 dark:text-slate-400 font-english">&copy; 2025 Limheang. All Rights Reserved.</p>
                 <div class="flex justify-center space-x-6 mt-4 md:mt-0">
-                    <a href="https://t.me/CodeCraft_Studio_CCS" target="_blank" class="text-gray-500 hover:text-primary"><i data-lucide="send" class="w-6 h-6"></i></a>
-                    <a href="https://www.facebook.com/lee.minh.heang.2025" target="_blank" class="text-gray-500 hover:text-primary"><i data-lucide="facebook" class="w-6 h-6"></i></a>
-                    <a href="https://heang-dev-sketch.github.io/UI/public/html/index.html" target="_blank" class="text-gray-500 hover:text-primary"><i data-lucide="globe" class="w-6 h-6"></i></a>
+                    <a href="https://t.me/CodeCraft_Studio_CCS" target="_blank" class="text-slate-500 hover:text-primary transition-colors"><i data-lucide="send" class="w-6 h-6"></i></a>
+                    <a href="https://www.facebook.com/lee.minh.heang.2025" target="_blank" class="text-slate-500 hover:text-primary transition-colors"><i data-lucide="facebook" class="w-6 h-6"></i></a>
+                    <a href="https://heang-dev-sketch.github.io/UI/public/html/index.html" target="_blank" class="text-slate-500 hover:text-primary transition-colors"><i data-lucide="globe" class="w-6 h-6"></i></a>
                 </div>
             </div>
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <!-- Custom Alert Modal -->
+    <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[999] p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-light-card dark:bg-dark-card p-6 rounded-lg shadow-xl max-w-sm w-full text-center transform scale-95 transition-transform duration-300">
+            <p id="alert-message" class="text-lg text-slate-700 dark:text-slate-300 mb-6"></p>
+            <button id="alert-close-btn" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors">Close</button>
+        </div>
+    </div>
 
+
+    <!-- Main Application Logic -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         
@@ -454,7 +632,19 @@
                 tags: ["HTML", "CSS", "WebDev"],
                 image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=800&auto=format&fit=crop",
                 summary: "ការណែនាំអំពីមូលដ្ឋានគ្រឹះនៃ HTML សម្រាប់បង្កើតរចនាសម្ព័ន្ធគេហទំព័រ និង CSS សម្រាប់រចនារូបរាងឱ្យស្រស់ស្អាត។",
-                content: `<p>HTML (HyperText Markup Language) និង CSS (Cascading Style Sheets) គឺជាបច្ចេកវិទ្យាស្នូលពីរសម្រាប់បង្កើតគេហទំព័រ។ HTML ផ្តល់នូវរចនាសម្ព័ន្ធមូលដ្ឋាន ខណៈពេលដែល CSS ត្រូវបានប្រើដើម្បីគ្រប់គ្រងការបង្ហាញ, ពណ៌, និងទម្រង់។ ការយល់ដឹងពីរបៀបដែលពួកវាធ្វើការជាមួយគ្នាគឺចាំបាច់សម្រាប់អ្នកអភិវឌ្ឍន៍គេហទំព័រគ្រប់រូប។</p>`
+                content: `<p>HTML (HyperText Markup Language) និង CSS (Cascading Style Sheets) គឺជាបច្ចេកវិទ្យាស្នូលពីរសម្រាប់បង្កើតគេហទំព័រ។ HTML ផ្តល់នូវរចនាសម្ព័ន្ធមូលដ្ឋាន ខណៈពេលដែល CSS ត្រូវបានប្រើដើម្បីគ្រប់គ្រងការបង្ហាញ, ពណ៌, និងទម្រង់។ ការយល់ដឹងពីរបៀបដែលពួកវាធ្វើការជាមួយគ្នាគឺចាំបាច់សម្រាប់អ្នកអភិវឌ្ឍន៍គេហទំព័រគ្រប់រូប។</p>
+                <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;My First Page&lt;/title&gt;
+  &lt;link rel="stylesheet" href="style.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Hello, World!&lt;/h1&gt;
+  &lt;p&gt;This is my first paragraph.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                <p>នៅក្នុងឧទាហរណ៍ខាងលើ, <code>&lt;h1&gt;</code> គឺជាចំណងជើង ហើយ <code>&lt;p&gt;</code> គឺជាកថាខណ្ឌ។ ឯកសារ <code>style.css</code> នឹងមានកូដ CSS ដើម្បីរចនាធាតុទាំងនេះ។</p>`
             },
             {
                 id: 2,
@@ -463,9 +653,17 @@
                 author: "Limheang",
                 category: "Technology",
                 tags: ["C++", "Programming"],
-                image: "https://plus.unsplash.com/premium_photo-1675793715030-0584c8ec4a13?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                image: "https://plus.unsplash.com/premium_photo-1675793715030-0584c8ec4a13?q=80&w=774&auto=format&fit=crop",
                 summary: "ស្វែងយល់ពីមូលដ្ឋានគ្រឹះនៃភាសា C++ ដែលជាភាសាដ៏មានឥទ្ធិពល ប្រើសម្រាប់បង្កើតកម្មវិធីដែលមានប្រសិទ្ធភាពខ្ពស់។",
-                content: `<p>C++ គឺជាភាសាសរសេរកម្មវិធីដ៏ពេញនិយមមួយដែលត្រូវបានគេស្គាល់ដោយសារប្រសិទ្ធភាពនិងភាពបត់បែនរបស់វា។ វាត្រូវបានប្រើប្រាស់ក្នុងការអភិវឌ្ឍហ្គេម, កម្មវិធីលើតុ, និងប្រព័ន្ធបង្កប់។ អត្ថបទនេះនឹងណែនាំអ្នកអំពីវាក្យសម្ព័ន្ធមូលដ្ឋាន, ប្រភេទទិន្នន័យ, និងរចនាសម្ព័ន្ធគ្រប់គ្រងក្នុង C++។</p>`
+                content: `<p>C++ គឺជាភាសាសរសេរកម្មវិធីដ៏ពេញនិយមមួយដែលត្រូវបានគេស្គាល់ដោយសារប្រសិទ្ធភាពនិងភាពបត់បែនរបស់វា។ វាត្រូវបានប្រើប្រាស់ក្នុងការអភិវឌ្ឍហ្គេម, កម្មវិធីលើតុ, និងប្រព័ន្ធបង្កប់។ អត្ថបទនេះនឹងណែនាំអ្នកអំពីវាក្យសម្ព័ន្ធមូលដ្ឋាន, ប្រភេទទិន្នន័យ, និងរចនាសម្ព័ន្ធគ្រប់គ្រងក្នុង C++។</p>
+                <blockquote>C++ គឺជាភាសាដ៏ស្មុគស្មាញមួយ ប៉ុន្តែវាផ្តល់នូវការគ្រប់គ្រងយ៉ាងលម្អិតទៅលើធនធានប្រព័ន្ធ។</blockquote>
+                <pre><code class="language-cpp">#include &lt;iostream&gt;
+
+int main() {
+  std::cout &lt;&lt; "Hello, C++ World!" &lt;&lt; std::endl;
+  return 0;
+}</code></pre>
+                <p>កូដខាងលើគឺជាកម្មវិធី "Hello, World!" សាមញ្ញមួយនៅក្នុង C++។ <code>#include &lt;iostream&gt;</code> គឺដើម្បីរួមបញ្ចូលបណ្ណាល័យ standard input-output stream ។ <code>std::cout</code> ត្រូវបានប្រើដើម្បីបោះពុម្ពទិន្នន័យទៅកាន់ console ។</p>`
             },
             {
                 id: 3,
@@ -474,9 +672,17 @@
                 author: "Limheang",
                 category: "AI",
                 tags: ["AI", "Gemini", "ChatGPT", "Grok", "DeepSeek"],
-                image: "https://plus.unsplash.com/premium_photo-1683121710572-7723bd2e235d?q=80&w=1032&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                image: "https://plus.unsplash.com/premium_photo-1683121710572-7723bd2e235d?q=80&w=1032&auto=format&fit=crop",
                 summary: "ការវិភាគ និងប្រៀបធៀបសមត្ថភាពរបស់ម៉ូដែល AI ឈានមុខគេចំនួនបួនគឺ Gemini, ChatGPT, Grok, និង DeepSeek។",
-                content: `<p>ពិភពនៃបញ្ញាសិប្បនិម្មិត (AI) កំពុងមានការវិវត្តយ៉ាងឆាប់រហ័ស។ ម៉ូដែលភាសាធំៗ (LLMs) ដូចជា Gemini របស់ Google, ChatGPT របស់ OpenAI, Grok របស់ xAI, និង DeepSeek កំពុងបង្ហាញពីសមត្ថភាពដ៏អស្ចារ្យ។ អត្ថបទនេះនឹងប្រៀបធៀបចំណុចខ្លាំងនិងចំណុចខ្សោយរបស់ម៉ូដែលនីមួយៗ ដើម្បីជួយឱ្យអ្នកយល់ពីភាពខុសគ្នារបស់វា។</p>`
+                content: `<p>ពិភពនៃបញ្ញាសិប្បនិម្មិត (AI) កំពុងមានការវិវត្តយ៉ាងឆាប់រហ័ស។ ម៉ូដែលភាសាធំៗ (LLMs) ដូចជា Gemini របស់ Google, ChatGPT របស់ OpenAI, Grok របស់ xAI, និង DeepSeek កំពុងបង្ហាញពីសមត្ថភាពដ៏អស្ចar្យ។</p>
+                <h2>ចំណុចសំខាន់ៗ</h2>
+                <ul>
+                    <li><b>Gemini:</b> ត្រូវបានគេស្គាល់ដោយសារសមត្ថភាពពហុទម្រង់ (multimodal) ដ៏ខ្លាំងក្លា ដោយអាចយល់ដឹងពីអត្ថបទ, រូបភាព, សំឡេង, និងវីដេអូ។</li>
+                    <li><b>ChatGPT (GPT-4):</b> គឺជាស្តង់ដារឧស្សាហកម្មសម្រាប់កិច្ចការច្នៃប្រឌិត និងការសរសេរកូដដ៏ស្មុគស្មាញ។</li>
+                    <li><b>Grok:</b> មានលក្ខណៈពិសេសក្នុងការចូលប្រើទិន្នន័យពេលវេលាពិតពី X (Twitter) និងមានបុគ្គលិកលក្ខណៈបែបកំប្លែង។</li>
+                    <li><b>DeepSeek:</b> ជាពិសេស DeepSeek-Coder គឺផ្តោតយ៉ាងខ្លាំងទៅលើការសរសេរកូដ និងមានសមត្ថភាពខ្ពស់ក្នុងកិច្ចការ programming ។</li>
+                </ul>
+                <p>អត្ថបទនេះនឹងប្រៀបធៀបចំណុចខ្លាំងនិងចំណុចខ្សោយរបស់ម៉ូដែលនីមួយៗ ដើម្បីជួយឱ្យអ្នកយល់ពីភាពខុសគ្នារបស់វា និងជ្រើសរើសឧបករណ៍ដែលត្រឹមត្រូវសម្រាប់តម្រូវការរបស់អ្នក។</p>`
             },
             {
                 id: 4,
@@ -485,9 +691,11 @@
                 author: "Limheang",
                 category: "Travels",
                 tags: ["សៀមរាប", "ប្រាសាទ", "ទេសចរណ៍"],
-                image: "https://plus.unsplash.com/premium_photo-1661963188432-5de8a11f21a7?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                image: "https://plus.unsplash.com/premium_photo-1661963188432-5de8a11f21a7?q=80&w=870&auto=format&fit=crop",
                 summary: "ការចែករំលែកបទពិសោធន៍នៃការទស្សនាប្រាសាទអង្គរវត្តដ៏អស្ចារ្យ និងទីកន្លែងគួរឱ្យចាប់អារម្មណ៍ផ្សេងទៀតក្នុងខេត្តសៀមរាប។",
-                content: `<p>ខេត្តសៀមរាបគឺជាបេះដូងនៃចក្រភពខ្មែរបុរាណ និងជាផ្ទះនៃប្រាសាទអង្គរវត្តដែលជាអច្ឆរិយវត្ថុមួយរបស់ពិភពលោក។ ក្រៅពីប្រាសាទ, ខេត្តនេះក៏មានផ្សាររាត្រីដ៏អ៊ូអរ, អាហារឆ្ងាញ់, និងវប្បធម៌ដ៏វិសេសវិសាល។ សូមតាមដានដំណើរផ្សងព្រេងរបស់ខ្ញុំនៅក្នុងទីក្រុងដ៏មានស្នេហ៍នេះ។</p>`
+                content: `<p>ខេត្តសៀមរាបគឺជាបេះដូងនៃចក្រភពខ្មែរបុរាណ និងជាផ្ទះនៃប្រាសាទអង្គរវត្តដែលជាអច្ឆរិយវត្ថុមួយរបស់ពិភពលោក។ ក្រៅពីប្រាសាទ, ខេត្តនេះក៏មានផ្សាររាត្រីដ៏អ៊ូអរ (Pub Street), អាហារឆ្ងាញ់, និងវប្បធម៌ដ៏វិសេសវិសាល។</p>
+                <p>ដំណើររបស់ខ្ញុំចាប់ផ្តើមពីព្រលឹមស្រាងៗ ដើម្បីទស្សនាព្រះអាទិត្យរះនៅអង្គរវត្ត។ ពន្លឺពណ៌មាសដែលចាំងចែងលើកំពូលប្រាសាទ គឺជាទិដ្ឋភាពដែលមិនអាចបំភ្លេចបាន។ បន្ទាប់មក ខ្ញុំបានបន្តទៅទស្សនាប្រាសាទបាយ័ន ជាមួយនឹងរូបចម្លាក់ព្រះភ័ក្ត្រដ៏ល្បីល្បាញ និងប្រាសាទតាព្រហ្ម ដែលត្រូវបានហ៊ុមព័ទ្ធដោយឫសឈើដ៏ធំ។</p>
+                <p>សូមតាមដានដំណើរផ្សងព្រេងរបស់ខ្ញុំនៅក្នុងទីក្រុងដ៏មានស្នេហ៍នេះ។</p>`
             },
             {
                 id: 5,
@@ -496,9 +704,11 @@
                 author: "Limheang",
                 category: "Life",
                 tags: ["ផលិតភាព", "សុខភាព", "រំលឹកកូដ"],
-                image: "https://plus.unsplash.com/premium_photo-1720287601920-ee8c503af775?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                image: "https://plus.unsplash.com/premium_photo-1720287601920-ee8c503af775?q=80&w=870&auto=format&fit=crop",
                 summary: "ហេតុអ្វីបានជាការសម្រាកពីការសរសេរកូដ និងការចំណាយពេលរំលឹកឡើងវិញនូវអ្វីដែលបានរៀនគឺសំខាន់សម្រាប់ការរីកចម្រើនយូរអង្វែង។",
-                content: `<p>ក្នុងនាមជាអ្នកអភិវឌ្ឍន៍, យើងតែងតែជាប់រវល់នឹងដោះស្រាយបញ្ហា និងការរៀនសូត្របច្ចេកវិទ្យាថ្មីៗ។ ទោះជាយ៉ាងណាក៏ដោយ, ការសម្រាកឱ្យបានគ្រប់គ្រាន់ និងការរំលឹកកូដចាស់ៗ ឬគំនិតដែលធ្លាប់បានរៀន គឺជាផ្នែកសំខាន់នៃដំណើរការរៀនសូត្រ។ វាជួយឱ្យចំណេះដឹងចាក់ឫសជ្រៅ និងការពារការអស់កម្លាំង។</p>`
+                content: `<p>ក្នុងនាមជាអ្នកអភិវឌ្ឍន៍, យើងតែងតែជាប់រវល់នឹងដោះស្រាយបញ្ហា និងការរៀនសូត្របច្ចេកវិទ្យាថ្មីៗ។ ទោះជាយ៉ាងណាក៏ដោយ, ការសម្រាកឱ្យបានគ្រប់គ្រាន់ និងការរំលឹកកូដចាស់ៗ ឬគំនិតដែលធ្លាប់បានរៀន គឺជាផ្នែកសំខាន់នៃដំណើរការរៀនសូត្រ។</p>
+                <p>ការសិក្សាស្រាវជ្រាវបង្ហាញថា ការសម្រាក (spaced repetition) ជួយឱ្យខួរក្បាលពង្រឹងការចងចាំរយៈពេលវែង។ ការព្យាយាមរៀនអ្វីមួយក្នុងរយៈពេលខ្លី (cramming) អាចជួយឱ្យអ្នកឆ្លងកាត់ការប្រឡង ប៉ុន្តែវានឹងមិនស្ថិតស្ថេរឡើយ។</p>
+                <p>ដូចគ្នានេះដែរ ការរំលឹកកូដ (code review) មិនមែនគ្រាន់តែដើម្បីស្វែងរកកំហុសប៉ុណ្ណោះទេ តែវាក៏ជាឱកាសដើម្បីរៀនសូត្រពីរបៀបដោះស្រាយបញ្ហារបស់អ្នកដទៃ និងពង្រឹងការយល់ដឹងរបស់យើងផងដែរ។</p>`
             }
         ];
         
@@ -507,11 +717,11 @@
         // Render a single post card
         const createPostCard = (post) => `
             <div class="bg-light-card dark:bg-dark-card rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer post-card transform hover:-translate-y-2 fade-in-section" data-post-id="${post.id}">
-                <img src="${post.image}" alt="${post.title}" class="w-full h-48 object-cover">
+                <img src="${post.image}" alt="${post.title}" class="w-full h-48 object-cover" onerror="this.src='https://placehold.co/800x400/4f46e5/ffffff?text=Image+Not+Found'">
                 <div class="p-6">
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2 font-english">${post.date} &bull; ${post.category}</p>
-                    <h3 class="text-xl font-bold mb-3">${post.title}</h3>
-                    <p class="text-gray-600 dark:text-gray-300 mb-4">${post.summary}</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">${post.date} &bull; ${post.category}</p>
+                    <h3 class="text-xl font-bold mb-3 text-light-text dark:text-dark-text">${post.title}</h3>
+                    <p class="text-slate-600 dark:text-slate-300 mb-4 h-20 overflow-hidden text-ellipsis">${post.summary}</p>
                     <div class="flex flex-wrap gap-2">
                         ${post.tags.map(tag => `<span class="text-xs font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 px-2.5 py-1 rounded-full">${tag}</span>`).join('')}
                     </div>
@@ -527,38 +737,42 @@
             singlePostContainer.innerHTML = `
                 <article>
                     <header class="mb-8">
-                        <a href="#home" class="back-to-home text-primary hover:underline mb-6 inline-block"><i data-lucide="arrow-left" class="inline-block w-4 h-4 mr-1"></i> ត្រឡប់ទៅអត្ថបទទាំងអស់</a>
+                        <a href="#home" class="back-to-home text-primary hover:underline mb-6 inline-flex items-center gap-1"><i data-lucide="arrow-left" class="inline-block w-4 h-4"></i> ត្រឡប់ទៅអត្ថបទទាំងអស់</a>
                         <h1 class="text-4xl md:text-5xl font-extrabold text-light-text dark:text-dark-text mb-4">${post.title}</h1>
-                        <div class="text-gray-500 dark:text-gray-400">
+                        <div class="text-slate-500 dark:text-slate-400">
                             <span>ដោយ ${post.author}</span> &bull;
                             <span class="font-english">${post.date}</span> &bull;
                             <span>${post.category}</span>
                         </div>
                     </header>
-                    <img src="${post.image}" alt="${post.title}" class="w-full rounded-lg mb-8 shadow-lg">
-                    <div class="prose dark:prose-invert max-w-none text-lg leading-relaxed">
+                    <img src="${post.image}" alt="${post.title}" class="w-full rounded-lg mb-8 shadow-lg" onerror="this.src='https://placehold.co/1200x600/4f46e5/ffffff?text=Image+Not+Found'">
+                    
+                    <!-- Post Content -->
+                    <div class="prose dark:prose-invert max-w-none text-lg leading-relaxed text-slate-700 dark:text-slate-300">
                         ${post.content}
                     </div>
                     
+                    <!-- Share Section -->
                     <div class="mt-12 pt-6 border-t border-light-border dark:border-dark-border">
                         <h3 class="text-lg font-semibold mb-4 text-center">ចែករំលែកអត្ថបទនេះ</h3>
                         <div class="flex justify-center space-x-4">
-                            <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}" target="_blank" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition font-english transform hover:scale-105">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}" target="_blank" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-english transform hover:scale-105">
                                 <i data-lucide="facebook" class="w-5 h-5"></i> Facebook
                             </a>
-                             <a href="https://t.me/share/url?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(post.title)}" target="_blank" class="flex items-center gap-2 bg-sky-500 text-white px-4 py-2 rounded-md hover:bg-sky-600 transition font-english transform hover:scale-105">
+                             <a href="https://t.me/share/url?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(post.title)}" target="_blank" class="flex items-center gap-2 bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition font-english transform hover:scale-105">
                                  <i data-lucide="send" class="w-5 h-5"></i> Telegram
                              </a>
-                             <button id="tiktok-share-btn" class="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition font-english transform hover:scale-105">
-                                 <i data-lucide="music" class="w-5 h-5"></i> TikTok
+                             <button id="copy-link-btn" data-url="${encodeURIComponent(postUrl)}" class="flex items-center gap-2 bg-slate-600 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition font-english transform hover:scale-105">
+                                 <i data-lucide="link" class="w-5 h-5"></i> Copy Link
                              </button>
                         </div>
                     </div>
 
+                    <!-- Comments Section -->
                     <div class="mt-12 pt-6 border-t border-light-border dark:border-dark-border">
                         <h2 class="text-3xl font-bold mb-6">មតិយោបល់</h2>
-                        <div class="bg-light-border dark:bg-dark-border p-8 rounded-lg text-center">
-                            <p class="text-gray-600 dark:text-gray-400">ផ្នែកមតិយោបល់នឹងត្រូវបានបន្ថែមនាពេលអនាគត។</p>
+                        <div class="bg-light-border/60 dark:bg-dark-border/60 p-8 rounded-lg text-center">
+                            <p class="text-slate-600 dark:text-slate-400">ផ្នែកមតិយោបល់នឹងត្រូវបានបន្ថែមនាពេលអនាគត។</p>
                         </div>
                     </div>
                 </article>
@@ -582,6 +796,7 @@
             const activePage = document.getElementById(pageId);
             if (activePage) activePage.classList.add('active');
 
+            // Update nav link active states
             navLinks.forEach(link => {
                 link.classList.toggle('active', link.getAttribute('href') === `#${pageId}`);
             });
@@ -589,6 +804,14 @@
             // If the new page is the service page, update the visitor count.
             if (pageId === 'service') {
                 updateVisitorCount();
+            }
+            
+            // Special handling for 'about' page to trigger skill animations
+            if (pageId === 'about') {
+                const skillsSection = document.getElementById('skills-section');
+                if (skillsSection && skillObserver) {
+                    skillObserver.observe(skillsSection); 
+                }
             }
             
             window.scrollTo(0, 0);
@@ -612,34 +835,50 @@
             }
         }
         
+        // --- EVENT LISTENERS ---
+        
+        // Main navigation handler
         document.body.addEventListener('click', (e) => {
-            const navLink = e.target.closest('.nav-link, #logo, .post-card, .back-to-home, .archive-link');
-            if (navLink) {
+            // Handle nav links, logo, post cards, etc.
+            const navElement = e.target.closest('.nav-link, #logo, .post-card, .back-to-home, .archive-link');
+            if (navElement) {
                 e.preventDefault();
                 let hash;
-                if(navLink.classList.contains('post-card')) {
-                    hash = `#post/${navLink.dataset.postId}`;
+                if(navElement.classList.contains('post-card')) {
+                    hash = `#post/${navElement.dataset.postId}`;
                 } else {
-                    hash = navLink.getAttribute('href');
+                    hash = navElement.getAttribute('href');
                 }
+                
                 if (window.location.hash !== hash) {
                     window.location.hash = hash || '#home';
                 }
+                
+                // Close mobile menu on navigation
                 document.getElementById('mobile-menu').classList.add('hidden');
             }
-
-            if(e.target.closest('#tiktok-share-btn')){
-               // Create a custom modal or message box instead of alert
-               const modal = document.createElement('div');
-               modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-               modal.innerHTML = `
-                   <div class="bg-light-card dark:bg-dark-card p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
-                       <h3 class="text-lg font-bold mb-2">TikTok Sharing</h3>
-                       <p class="text-gray-600 dark:text-gray-400 mb-4">For the best experience, please share to TikTok directly from their mobile app.</p>
-                       <button class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover" onclick="this.parentElement.parentElement.remove()">Got it</button>
-                   </div>
-               `;
-               document.body.appendChild(modal);
+            
+            // Handle copy link button
+            if (e.target.closest('#copy-link-btn')) {
+                const btn = e.target.closest('#copy-link-btn');
+                const urlToCopy = decodeURIComponent(btn.dataset.url);
+                
+                // Use the fallback copy method
+                const textArea = document.createElement("textarea");
+                textArea.value = urlToCopy;
+                textArea.style.position = "fixed"; // Avoid scrolling to bottom
+                textArea.style.left = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showAlert("Link copied to clipboard!");
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                    showAlert("Failed to copy link.");
+                }
+                document.body.removeChild(textArea);
             }
         });
 
@@ -649,6 +888,10 @@
 
         // Particles.js configuration
         const setupParticles = () => {
+            if (typeof particlesJS === 'undefined') {
+                console.error("particles.js not loaded.");
+                return;
+            }
             const isDark = document.documentElement.classList.contains('dark');
             const particleColor = isDark ? "#ffffff" : "#0f172a";
             const lineColor = isDark ? "#334155" : "#cbd5e1";
@@ -657,16 +900,16 @@
               "particles": {
                 "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
                 "color": { "value": particleColor },
-                "shape": { "type": "circle", "stroke": { "width": 0, "color": "#000000" }, "polygon": { "nb_sides": 5 }, },
-                "opacity": { "value": 0.5, "random": false, "anim": { "enable": false, "speed": 1, "opacity_min": 0.1, "sync": false } },
-                "size": { "value": 3, "random": true, "anim": { "enable": false, "speed": 40, "size_min": 0.1, "sync": false } },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.3, "random": true, "anim": { "enable": true, "speed": 1, "opacity_min": 0.1, "sync": false } },
+                "size": { "value": 3, "random": true, "anim": { "enable": false } },
                 "line_linked": { "enable": true, "distance": 150, "color": lineColor, "opacity": 0.4, "width": 1 },
-                "move": { "enable": true, "speed": 2, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false, "attract": { "enable": false, "rotateX": 600, "rotateY": 1200 } }
+                "move": { "enable": true, "speed": 2, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false }
               },
               "interactivity": {
                 "detect_on": "canvas",
                 "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": true, "mode": "push" }, "resize": true },
-                "modes": { "grab": { "distance": 140, "line_linked": { "opacity": 1 } }, "bubble": { "distance": 400, "size": 40, "duration": 2, "opacity": 8, "speed": 3 }, "repulse": { "distance": 200, "duration": 0.4 }, "push": { "particles_nb": 4 }, "remove": { "particles_nb": 2 } }
+                "modes": { "grab": { "distance": 140, "line_linked": { "opacity": 0.7 } }, "push": { "particles_nb": 4 } }
               },
               "retina_detect": true
             });
@@ -676,7 +919,8 @@
         const themeToggle = document.getElementById('theme-toggle');
         const htmlEl = document.documentElement;
 
-        const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark for tech theme
+        // Default to dark for a tech theme, or use saved preference
+        const savedTheme = localStorage.getItem('theme') || 'dark'; 
         htmlEl.classList.add(savedTheme);
 
         themeToggle.addEventListener('click', () => {
@@ -687,7 +931,7 @@
             setupParticles(); // Re-initialize particles with new colors
         });
 
-        // Mobile Menu
+        // Mobile Menu Toggle
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         mobileMenuButton.addEventListener('click', () => {
@@ -699,7 +943,7 @@
         const searchResultsContainer = document.getElementById('search-results-container');
         const searchResults = document.getElementById('search-results');
         const noResultsMessage = document.getElementById('no-results-message');
-        const latestPostsSection = document.querySelector('#home section:last-child');
+        const latestPostsContainer = document.getElementById('latest-posts-container');
 
         function handleSearch(e) {
             const query = e.target.value.toLowerCase().trim();
@@ -707,16 +951,19 @@
                 const filteredPosts = posts.filter(post => 
                     post.title.toLowerCase().includes(query) ||
                     post.summary.toLowerCase().includes(query) ||
-                    post.tags.some(tag => tag.toLowerCase().includes(query))
+                    post.tags.some(tag => tag.toLowerCase().includes(query)) ||
+                    post.category.toLowerCase().includes(query)
                 );
                 
                 renderPosts('search-results', filteredPosts);
                 searchResultsContainer.classList.remove('hidden');
-                latestPostsSection.classList.add('hidden');
+                latestPostsContainer.classList.add('hidden');
                 noResultsMessage.classList.toggle('hidden', filteredPosts.length > 0);
             } else {
+                // Clear search
                 searchResultsContainer.classList.add('hidden');
-                latestPostsSection.classList.remove('hidden');
+                latestPostsContainer.classList.remove('hidden');
+                noResultsMessage.classList.add('hidden');
             }
         }
         searchBars.forEach(bar => bar.addEventListener('input', handleSearch));
@@ -726,8 +973,10 @@
             const allCategories = ['All', ...new Set(posts.map(p => p.category))];
             const filtersContainer = document.getElementById('category-filters');
             
+            if (!filtersContainer) return;
+
             filtersContainer.innerHTML = allCategories.map(cat => `
-                <button class="category-btn px-4 py-2 rounded-full font-semibold transition ${cat === 'All' ? 'bg-primary text-white' : 'bg-light-border dark:bg-dark-border'}" data-category="${cat}">
+                <button class="category-btn px-4 py-2 rounded-full font-semibold transition-colors duration-200 ${cat === 'All' ? 'bg-primary text-white' : 'bg-light-border dark:bg-dark-border text-light-text dark:text-dark-text'}" data-category="${cat}">
                     ${cat}
                 </button>
             `).join('');
@@ -740,10 +989,10 @@
                     
                     filtersContainer.querySelectorAll('.category-btn').forEach(btn => {
                         btn.classList.remove('bg-primary', 'text-white');
-                        btn.classList.add('bg-light-border', 'dark:bg-dark-border');
+                        btn.classList.add('bg-light-border', 'dark:bg-dark-border', 'text-light-text', 'dark:text-dark-text');
                     });
                     e.target.classList.add('bg-primary', 'text-white');
-                    e.target.classList.remove('bg-light-border', 'dark:bg-dark-border');
+                    e.target.classList.remove('bg-light-border', 'dark:bg-dark-border', 'text-light-text', 'dark:text-dark-text');
 
                     const filteredPosts = selectedCategory === 'All' 
                         ? posts 
@@ -756,6 +1005,8 @@
         // Archive Page Logic
         function setupArchivePage() {
             const archiveList = document.getElementById('archive-list');
+            if (!archiveList) return;
+
             const postsByMonth = posts.reduce((acc, post) => {
                 const date = new Date(post.date);
                 const monthName = date.toLocaleString('en-US', { month: 'long' });
@@ -772,9 +1023,9 @@
                     <ul class="space-y-3">
                         ${monthPosts.map(post => `
                             <li>
-                                <a href="#post/${post.id}" class="archive-link flex flex-col sm:flex-row justify-between items-start sm:items-center group p-2 rounded-md hover:bg-light-border dark:hover:bg-dark-border transition-colors">
-                                    <span class="text-lg text-light-text dark:text-dark-text group-hover:text-primary transition">${post.title}</span>
-                                    <span class="text-sm text-gray-500 dark:text-gray-400 font-english">${post.date}</span>
+                                <a href="#post/${post.id}" class="archive-link flex flex-col sm:flex-row justify-between items-start sm:items-center group p-3 rounded-lg hover:bg-light-border/60 dark:hover:bg-dark-border/60 transition-colors">
+                                    <span class="text-lg text-light-text dark:text-dark-text group-hover:text-primary transition-colors">${post.title}</span>
+                                    <span class="text-sm text-slate-500 dark:text-slate-400 font-english">${post.date}</span>
                                 </a>
                             </li>
                         `).join('')}
@@ -783,24 +1034,41 @@
             `).join('');
         }
 
-        // Visitor Counter Logic
+        // Visitor Counter Logic (using Firebase)
         async function updateVisitorCount() {
             const countElement = document.getElementById('visitor-count');
             if (!countElement) return;
 
+            // Wait for firebase to be ready
+            if (!window.isFirebaseReady) {
+                console.warn("Firebase not ready, waiting for visitor count...");
+                document.addEventListener('firebaseReady', () => updateVisitorCount(true), { once: true });
+                return;
+            }
+
+            const db = window.firebaseDb;
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            // Use a public doc for the counter
+            const counterRef = doc(db, `artifacts/${appId}/public/data/siteStats/pageViews`);
+
             try {
-                // This is the endpoint for the serverless function you will create.
-                // It will not work until the backend is deployed.
-                const response = await fetch('/api/counter'); 
-                const data = await response.json();
-                countElement.textContent = data.count;
+                // Increment the count
+                await setDoc(counterRef, { count: increment(1), lastVisit: serverTimestamp() }, { merge: true });
+                
+                // Get the new count
+                const docSnap = await getDoc(counterRef);
+                if (docSnap.exists()) {
+                    countElement.textContent = docSnap.data().count.toLocaleString();
+                } else {
+                    countElement.textContent = '1';
+                }
             } catch (error) {
-                console.error('Error fetching visitor count:', error);
+                console.error('Error updating visitor count:', error);
                 countElement.textContent = 'N/A';
             }
         }
         
-        // AI Tool Logic
+        // --- AI Tool Logic (UPDATED: Switched to Gemini) ---
         const generateBtn = document.getElementById('generate-ai-content');
         const aiPrompt = document.getElementById('ai-prompt');
         const aiResultContainer = document.getElementById('ai-result-container');
@@ -822,28 +1090,96 @@
             });
         }
         
-        async function getAiResponse(prompt) {
-            // NOTE: In a real-world app, API keys should NOT be exposed on the client-side.
-            // This is for demonstration purposes only. The key should be handled on a secure server.
-            const apiKey = "AIzaSyCGeAhRrYpYR3K_GxCIOu0oMm7dk5Q84W0"; // IMPORTANT: Replace with a valid API key for testing
-            if (apiKey === "YOUR_API_KEY_HERE") {
-                 return "Please replace 'YOUR_API_KEY_HERE' with your actual Google AI Gemini API key in the script to test this feature.";
-            }
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
-                    })
-                });
-                if (!response.ok) {
-                    throw new Error(`API Error: ${response.statusText}`);
+        /**
+         * NEW: Helper function for fetch with exponential backoff.
+         * This handles retries for network errors or server-side (5xx) errors.
+         */
+        async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+
+                    // If response is ok, parse and return
+                    if (response.ok) {
+                        return await response.json();
+                    }
+
+                    // Don't retry client-side errors (4xx) or quota issues
+                    if (response.status >= 400 && response.status < 500) {
+                        const errorData = await response.json();
+                        let message = errorData?.error?.message || `Error ${response.status}: ${response.statusText}`;
+                        // Specific check for Gemini quota/API key issues
+                        if (errorData?.error?.status === 'PERMISSION_DENIED' || errorData?.error?.status === 'RESOURCE_EXHAUSTED') {
+                            message = `API Error: ${errorData.error.message} Please check API key or quota.`;
+                        }
+                        throw new Error(message);
+                    }
+                    
+                    // For 5xx server errors, log and prepare to retry
+                    console.warn(`Server error ${response.status}. Retrying in ${delay / 1000}s... (Attempt ${i + 1}/${retries})`);
+
+                } catch (error) {
+                    // Handle network errors (e.g., fetch failed to connect)
+                    if (i === retries - 1) {
+                         // If this was the last retry, re-throw the error
+                        throw error;
+                    }
+                    console.warn(`Network error. Retrying in ${delay / 1000}s... (Attempt ${i + 1}/${retries})`, error.message);
                 }
-                const data = await response.json();
-                const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                return responseText || "Sorry, the response was empty or blocked for safety reasons.";
+
+                // Wait for the delay before retrying
+                await new Promise(resolve => setTimeout(resolve, delay));
+                // Increase delay for next retry
+                delay *= 2;
+            }
+
+            // If all retries fail
+            throw new Error("Failed to connect to AI service after several attempts.");
+        }
+
+
+        /**
+         * UPDATED: getAiResponse using Google Gemini API
+         * This function now uses the Gemini API.
+         */
+        async function getAiResponse(prompt) {
+            // API key is left as an empty string.
+            // The canvas environment will automatically provide it.
+            const apiKey = "AIzaSyBAeELo0ssbnSX2DOGKxkAyx9wAvrjikHs"; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            const systemPrompt = "You are a helpful assistant for a tech blog. Your name is 'Heang.AI'. Answer questions concisely and clearly, in the same language as the user's prompt (Khmer or English).";
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+            };
+
+            try {
+                const result = await fetchWithBackoff(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                // Parse the response from Gemini
+                const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (responseText) {
+                    return responseText;
+                } else {
+                    // Handle cases where the response was blocked or empty
+                    const safetyReason = result.candidates?.[0]?.finishReason;
+                    if (safetyReason === 'SAFETY') {
+                        return "Sorry, the response was blocked for safety reasons.";
+                    }
+                    return "Sorry, the AI returned an empty response. Please try rephrasing.";
+                }
+                
             } catch (error) {
                 console.error("Error calling Gemini API:", error);
                 return `There was a problem connecting to the AI service: ${error.message}. Please try again later.`;
@@ -854,17 +1190,24 @@
             generateBtn.addEventListener('click', async () => {
                 const prompt = aiPrompt.value.trim();
                 if (!prompt) {
-                    // Custom message instead of alert
-                    aiResult.textContent = 'Please enter a topic or your question.';
-                    aiResultContainer.classList.remove('hidden');
+                    showAlert('Please enter a topic or your question.');
                     return;
                 }
+                
                 aiLoader.classList.remove('hidden');
                 aiResultContainer.classList.add('hidden');
+                generateBtn.disabled = true;
+
                 const response = await getAiResponse(prompt);
-                aiResult.textContent = response;
+                
+                // We don't have a markdown parser, so just set text content
+                // This is safer as Gemini can return markdown.
+                // Using textContent prevents any potential XSS from a markdown-to-HTML conversion.
+                aiResult.textContent = response; 
+                
                 aiLoader.classList.add('hidden');
                 aiResultContainer.classList.remove('hidden');
+                generateBtn.disabled = false;
             });
         }
 
@@ -900,19 +1243,125 @@
             sections.forEach(section => sectionObserver.observe(section));
         }
         
+        // --- CUSTOM ALERT MODAL ---
+        const alertModal = document.getElementById('alert-modal');
+        const alertMessage = document.getElementById('alert-message');
+        const alertCloseBtn = document.getElementById('alert-close-btn');
+
+        function showAlert(message) {
+            if(alertMessage) alertMessage.textContent = message;
+            if(alertModal) {
+                alertModal.classList.remove('hidden');
+                setTimeout(() => {
+                    alertModal.classList.add('opacity-100');
+                    alertModal.querySelector('div').classList.add('scale-100');
+                }, 10);
+            }
+        }
+
+        function closeAlert() {
+             if(alertModal) {
+                 alertModal.classList.remove('opacity-100');
+                 alertModal.querySelector('div').classList.remove('scale-100');
+                 setTimeout(() => {
+                     alertModal.classList.add('hidden');
+                 }, 300);
+             }
+        }
+        
+        if(alertCloseBtn) alertCloseBtn.addEventListener('click', closeAlert);
+        if(alertModal) {
+            alertModal.addEventListener('click', (e) => {
+                if (e.target === alertModal) closeAlert();
+            });
+        }
+        // Make showAlert globally accessible for other scripts
+        window.showAlert = showAlert;
 
         // --- INITIALIZATION ---
         function init() {
-            renderPosts('latest-posts', posts);
+            renderPosts('latest-posts', posts.slice(0, 3)); // Show only 3 latest on home
             setupCategoriesPage();
             setupArchivePage();
-            handleRouteChange();
+            handleRouteChange(); // This will also call showPage
             setupParticles();
             lucide.createIcons();
+            
+            // Note: updateVisitorCount is called by showPage('service')
+            // or by the 'firebaseReady' event if the page is already active.
         }
         
         init();
 
+    });
+    </script>
+
+    <!-- Contact Form Script (Reverted to Telegram) -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const contactForm = document.getElementById('contactForm');
+        const submitBtn = document.getElementById('submit-btn');
+        const submitText = document.getElementById('submit-text');
+        const submitLoader = document.getElementById('submit-loader');
+
+        if (contactForm) {
+            // Ensure lucide icons are created for the loader
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons(); 
+            }
+            
+            const botToken = '7249472136:AAHtXRB7YSMaWi0MxiDRjzbYmnImdgCh_FA'; // <-- Your Telegram Bot Token
+            const chatId = '1458220999'; // <-- Your Telegram Chat ID
+
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const message = document.getElementById('message').value.trim();
+
+                // Use the global showAlert
+                if(name === "" || email === "" || message === "") {
+                    if(window.showAlert) window.showAlert("សូមបញ្ចូលទិន្នន័យគ្រប់វាល!"); 
+                    return;
+                }
+
+                // Show loader
+                if(submitText) submitText.classList.add('hidden');
+                if(submitLoader) submitLoader.classList.remove('hidden');
+                if(submitBtn) submitBtn.disabled = true;
+
+                const text = `📩 សារថ្មីពី Website:\n\n👤 ឈ្មោះ: ${name}\n📧 អ៊ីមែល: ${email}\n💬 សារ: ${message}`;
+
+                fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: text
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.ok){
+                        if(window.showAlert) window.showAlert("✅ សាររបស់អ្នកបានផ្ញើរួចរាល់!");
+                        contactForm.reset();
+                    } else {
+                        if(window.showAlert) window.showAlert("❌ មានបញ្ហាក្នុងការផ្ញើសារ.");
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    if(window.showAlert) window.showAlert("❌ មានកំហុស: " + error.message);
+                })
+                .finally(() => {
+                    // Hide loader
+                    if(submitText) submitText.classList.remove('hidden');
+                    if(submitLoader) submitLoader.classList.add('hidden');
+                    if(submitBtn) submitBtn.disabled = false;
+                });
+            });
+        }
     });
     </script>
 </body>
