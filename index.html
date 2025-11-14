@@ -1126,10 +1126,12 @@ int main() {
                         <h2 class="text-3xl font-bold mb-6">មតិយោបល់</h2>
                         
                         <!-- Comment Form (បង្ហាញតែពេល user login) -->
-                        <form id="comment-form" class="mb-8 hidden">
-                            <textarea id="comment-text" class="w-full p-3 rounded-lg bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-primary" rows="4" placeholder="សរសេរមតិយោបល់របស់អ្នក..." required></textarea>
-                            <button type="submit" class="mt-4 px-6 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-hover transition-colors">ផ្ញើមតិ</button>
-                        </form>
+                        <form id="comment-form" class="mb-8 hidden bg-light-card dark:bg-dark-card p-4 rounded-lg shadow-md border border-light-border dark:border-dark-border">
+                            
+                                                        <textarea id="comment-text" class="w-full p-3 rounded-lg bg-light-bg dark:bg-dark-bg border border-light-border dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-primary" rows="4" placeholder="សរសេរមតិយោបល់របស់អ្នក..." required></textarea>
+                            
+                            <button type="submit" class="mt-4 px-6 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-hover transition-colors">ផ្ញើមតិ</button>
+                        </form>
                         
                         <!-- Login Prompt (បង្ហាញពេល user មិនទាន់ login) -->
                         <div id="comment-login-prompt" class="p-4 bg-light-border/60 dark:bg-dark-border/60 rounded-lg text-center mb-8">
