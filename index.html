@@ -62,6 +62,7 @@
         const firebaseConfig = typeof __firebase_config !== 'undefined'
             ? JSON.parse(__firebase_config)
             : { 
+                    // This is just a fallback, the environment config will be used
                     apiKey: "AIzaSyAKRqFctLLhdgNzS7R_PS33Ki13gCfxCeQ",
                     authDomain: "lao-limheang-168.firebaseapp.com",
                     projectId: "lao-limheang-168",
@@ -73,7 +74,23 @@
 
         if (typeof __firebase_config === 'undefined') {
             console.warn("Firebase config not found. Using default placeholder.");
-            showDbErrorNotification("Error: Firebase is not configured.");
+            // We need to define this function *before* calling it
+            window.showDbErrorNotification = function(message) {
+                 let errorToast = document.getElementById('db-error-toast');
+                 if (!errorToast) {
+                     errorToast = document.createElement('div');
+                     errorToast.id = 'db-error-toast';
+                     errorToast.className = 'fixed bottom-5 right-5 bg-red-600 text-white py-3 px-5 rounded-lg shadow-lg z-[100]';
+                     errorToast.textContent = message;
+                     document.body.appendChild(errorToast);
+                     setTimeout(() => {
+                         errorToast.style.opacity = '0';
+                         errorToast.style.transition = 'opacity 0.5s ease';
+                         setTimeout(() => errorToast.remove(), 500);
+                     }, 5000);
+                 }
+            }
+            window.showDbErrorNotification("Error: Firebase is not configured.");
         }
         
         // --- Initialize Firebase ---
@@ -137,23 +154,36 @@
             console.error("Firebase connection error:", error.message);
             window.isFirebaseReady = false;
             // Show a non-blocking notification to the user
-            showDbErrorNotification("Error: Could not connect to database. Some features may not work.");
+            if(window.showDbErrorNotification) {
+                window.showDbErrorNotification("Error: Could not connect to database. Some features may not work.");
+            } else {
+                // Fallback if the function wasn't defined yet
+                setTimeout(() => {
+                    let errorToast = document.createElement('div');
+                    errorToast.id = 'db-error-toast';
+                    errorToast.className = 'fixed bottom-5 right-5 bg-red-600 text-white py-3 px-5 rounded-lg shadow-lg z-[100]';
+                    errorToast.textContent = "Error: Could not connect to database.";
+                    document.body.appendChild(errorToast);
+                }, 1000);
+            }
         }
 
-        // Error notification function (no change)
-        function showDbErrorNotification(message) {
-            let errorToast = document.getElementById('db-error-toast');
-            if (!errorToast) {
-                errorToast = document.createElement('div');
-                errorToast.id = 'db-error-toast';
-                errorToast.className = 'fixed bottom-5 right-5 bg-red-600 text-white py-3 px-5 rounded-lg shadow-lg z-[100]';
-                errorToast.textContent = message;
-                document.body.appendChild(errorToast);
-                setTimeout(() => {
-                    errorToast.style.opacity = '0';
-                    errorToast.style.transition = 'opacity 0.5s ease';
-                    setTimeout(() => errorToast.remove(), 500);
-                }, 5000);
+        // Error notification function (moved here to be available for config error)
+        if (!window.showDbErrorNotification) {
+            window.showDbErrorNotification = function(message) {
+                let errorToast = document.getElementById('db-error-toast');
+                if (!errorToast) {
+                    errorToast = document.createElement('div');
+                    errorToast.id = 'db-error-toast';
+                    errorToast.className = 'fixed bottom-5 right-5 bg-red-600 text-white py-3 px-5 rounded-lg shadow-lg z-[100]';
+                    errorToast.textContent = message;
+                    document.body.appendChild(errorToast);
+                    setTimeout(() => {
+                        errorToast.style.opacity = '0';
+                        errorToast.style.transition = 'opacity 0.5s ease';
+                        setTimeout(() => errorToast.remove(), 500);
+                    }, 5000);
+                }
             }
         }
     </script>
@@ -649,7 +679,7 @@
                     ==========================================================
                     -->
                     <div class="animated-avatar-container flex-shrink-0">
-                        <img src="profile.jfif" alt="Lao Limheang" class="transform hover:scale-105 transition-transform duration-300" onerror="this.src=''">
+                        <img src="profile.jfif" alt="Lao Limheang" class="transform hover:scale-105 transition-transform duration-300" onerror="this.src='https://placehold.co/256x256/4f46e5/ffffff?text=HEANG'">
                     </div>
 
                     <div class="text-lg text-slate-700 dark:text-slate-300 space-y-6 text-center md:text-left">
@@ -728,7 +758,7 @@
                              <div class="w-full bg-light-border rounded-full h-2.5 dark:bg-dark-border overflow-hidden"><div class="progress-bar bg-red-500 h-2.5 rounded-full" data-width="20" style="width: 0%"></div></div>
                          </div>
 
-                 </div>
+                   </div>
                  </div>
         </div>
 
@@ -939,6 +969,11 @@
         <script>
     document.addEventListener('DOMContentLoaded', function() {
         
+        // ==========================================================
+        // FIX 1: Define appId at the top so all functions can use it
+        // ==========================================================
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const commentsPath = `artifacts/${appId}/public/data/siteStats/pageViews/comments`;
         // --- DATA ---
         const posts = [
              {
@@ -1189,104 +1224,110 @@ int main() {
         // ==========================================================
 
         // Function ទី១៖ ដំណើរការពេល user ចុចប៊ូតុង "ផ្ញើមតិ"
-        async function handleCommentSubmit(e) {
-            e.preventDefault();
-            if (!window.currentUser || !window.isFirebaseReady) return;
+        // Function ទី១៖ ដំណើរការពេល user ចុចប៊ូតុង "ផ្ញើមតិ"
+        async function handleCommentSubmit(e) {
+            e.preventDefault();
+            if (!window.currentUser || !window.isFirebaseReady) return;
 
-            const commentTextEl = document.getElementById('comment-text');
-            const commentText = commentTextEl.value.trim();
-            const commentsSection = document.getElementById('comments-section');
-            const postId = commentsSection.dataset.postId;
+            const commentTextEl = document.getElementById('comment-text');
+            const commentText = commentTextEl.value.trim();
+            const commentsSection = document.getElementById('comments-section');
+            const postId = commentsSection.dataset.postId;
 
-            if (!commentText || !postId) return;
+            if (!commentText || !postId) return;
 
-            const db = window.firebaseDb;
-            const { collection, addDoc, serverTimestamp } = window.firebaseFirestoreImports;
+            // (យើងមិនបាច់ define 'commentsPath' នៅទីនេះទៀតទេ ព្រោះវាជា global)
+            
+            const db = window.firebaseDb;
+            const { collection, addDoc, serverTimestamp } = window.firebaseFirestoreImports;
 
-            try {
-                // បន្ថែម Comment ទៅកាន់ Firestore
-                await addDoc(collection(db, "comments"), {
-                    postId: postId,
-                    text: commentText,
-                    authorName: window.currentUser.displayName || "Anonymous",
-                    authorAvatar: window.currentUser.photoURL || `https://placehold.co/64x64/4f46e5/ffffff?text=${window.currentUser.email[0].toUpperCase()}`,
-                    authorUid: window.currentUser.uid,
-                    createdAt: serverTimestamp()
-                });
+            // --- 💡 START FIX (សម្រាប់ Anonymous User) 💡 ---
+            const authorName = window.currentUser.displayName || "Anonymous User";
+            
+            const avatarLetter = (window.currentUser.email)
+                ? window.currentUser.email[0].toUpperCase()
+                : 'A'; // ប្រើ 'A' សម្រាប់ Anonymous
 
-                // សម្អាត textarea
-                commentTextEl.value = '';
-                // (loadComments នឹង update ស្វ័យប្រវត្តិប្រសិនបើយើងប្រើ onSnapshot)
-            } catch (error) {
-                console.error("Error adding comment: ", error);
-                if (window.showAlert) window.showAlert("មានបញ្ហាក្នុងការផ្ញើមតិ។");
-            }
-        }
+            const authorAvatar = window.currentUser.photoURL || `https://placehold.co/64x64/4f46e5/ffffff?text=${avatarLetter}`;
+            // --- 💡 END FIX 💡 ---
+
+            try {
+                // ឥឡូវនេះវាប្រើ 'commentsPath' (global) យ៉ាងត្រឹមត្រូវ
+                await addDoc(collection(db, commentsPath), { 
+                    postId: postId,
+                    text: commentText,
+                    authorName: authorName,
+                    authorAvatar: authorAvatar,
+                    authorUid: window.currentUser.uid,
+                    createdAt: serverTimestamp()
+                });
+
+                commentTextEl.value = '';
+            } catch (error) {
+                console.error("Error adding comment: ", error); 
+                if (window.showAlert) window.showAlert("មានបញ្ហាក្នុងការផ្ញើមតិ។");
+            }
+        }
 
         // Function ទី២៖ សម្រាប់ទាញមតិពី Firestore មកបង្ហាញ
-        function loadComments(postId) {
-            if (!window.isFirebaseReady) {
-                // រង់ចាំ Firebase Ready
-                document.addEventListener('firebaseReady', () => loadComments(postId), { once: true });
-                return;
-            }
+        // Function ទី២៖ សម្រាប់ទាញមតិពី Firestore មកបង្ហាញ
+        function loadComments(postId) {
+            if (!window.isFirebaseReady) {
+                document.addEventListener('firebaseReady', () => loadComments(postId), { once: true });
+                return;
+            }
 
-            const db = window.firebaseDb;
-            const { collection, query, where, orderBy, onSnapshot } = window.firebaseFirestoreImports;
-            const commentsList = document.getElementById('comments-list');
-            const commentsLoading = document.getElementById('comments-loading');
+            const db = window.firebaseDb;
+            const { collection, query, where, orderBy, onSnapshot } = window.firebaseFirestoreImports;
+            const commentsList = document.getElementById('comments-list');
+            const commentsLoading = document.getElementById('comments-loading');
 
-            // បង្កើត Query ដើម្បីទាញតែមតិសម្រាប់ Post នេះ
-            // **NOTE:** You must create an Index in Firebase for this to work!
-            // Go to Firebase -> Firestore -> Indexes -> Add Index
-            // Collection: 'comments', Fields: 'postId' (Ascending), 'createdAt' (Ascending)
-            const q = query(
-                collection(db, "comments"), 
-                where("postId", "==", postId),
-                orderBy("createdAt", "asc") // រៀបចំតាមថ្មីចាស់
-            );
+            // ប្រើ 'commentsPath' (global) យ៉ាងត្រឹមត្រូវ
+            const q = query(
+                collection(db, commentsPath), // <-- ប្រើអថេរ global
+                where("postId", "==", postId),
+                orderBy("createdAt", "asc")
+            );
 
-            // ប្រើ onSnapshot ដើម្បីឱ្យមតិ update ភ្លាមៗ (Real-time)
-            onSnapshot(q, (querySnapshot) => {
-                if (commentsLoading) commentsLoading.classList.add('hidden');
-                if (!commentsList) return; // Exit if user navigated away
-                commentsList.innerHTML = ''; // សម្អាតមតិចាស់ៗ
-                
-                if (querySnapshot.empty) {
-                    commentsList.innerHTML = '<p class="text-slate-500">មិនទាន់មានមតិយោបល់ទេ។</p>';
-                } else {
-                    querySnapshot.forEach((doc) => {
-                        const comment = doc.data();
-                        const commentDate = comment.createdAt ? new Date(comment.createdAt.toDate()).toLocaleString('en-GB') : 'Just now';
-                        
-                        // បង្កើត HTML សម្រាប់ Comment នីមួយៗ
-                        const commentEl = document.createElement('div');
-                        commentEl.className = 'flex items-start gap-4';
-                        commentEl.innerHTML = `
-                            <img src="${comment.authorAvatar}" alt="${comment.authorName}" class="w-10 h-10 rounded-full object-cover border-2 border-primary/50" onerror="this.src='https://placehold.co/64x64/eeeeee/aaaaaa?text=U'">
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-bold text-light-text dark:text-dark-text">${comment.authorName}</span>
-                                    <span class="text-xs text-slate-500 dark:text-slate-400 font-english">${commentDate}</span>
-                                </div>
-                                <p class="mt-1 text-slate-700 dark:text-slate-300 whitespace-pre-wrap">${comment.text}</p>
-                            </div>
-                        `;
-                        commentsList.appendChild(commentEl);
-                    });
-                }
-            }, (error) => {
-                console.error("Error loading comments: ", error);
-                if (commentsLoading) commentsLoading.classList.add('hidden');
-                // Check if the error is about a missing index
-                if (error.code === 'failed-precondition') {
-                    console.error("FIREBASE INDEX MISSING: You need to create an index for comments. See 'loadComments' function.");
-                    commentsList.innerHTML = '<p class="text-red-500">Error: Comments could not be loaded. (Admin: Index missing)</p>';
-                } else {
-                    commentsList.innerHTML = '<p class="text-red-500">Error loading comments. Please try again.</p>';
-                }
-            });
-        }
+            onSnapshot(q, (querySnapshot) => {
+                if (commentsLoading) commentsLoading.classList.add('hidden');
+                if (!commentsList) return;
+                commentsList.innerHTML = ''; 
+                
+                if (querySnapshot.empty) {
+                    commentsList.innerHTML = '<p class="text-slate-500">មិនទាន់មានមតិយោបល់ទេ។</p>';
+                } else {
+                    querySnapshot.forEach((doc) => {
+                        const comment = doc.data();
+                        const commentDate = comment.createdAt ? new Date(comment.createdAt.toDate()).toLocaleString('en-GB') : 'Just now';
+                        
+                        const commentEl = document.createElement('div');
+                        commentEl.className = 'flex items-start gap-4';
+                        commentEl.innerHTML = `
+                            <img src="${comment.authorAvatar}" alt="${comment.authorName}" class="w-10 h-10 rounded-full object-cover border-2 border-primary/50" onerror="this.src='https://placehold.co/64x64/eeeeee/aaaaaa?text=U'">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-light-text dark:text-dark-text">${comment.authorName}</span>
+                                    <span class="text-xs text-slate-500 dark:text-slate-400 font-english">${commentDate}</span>
+                                </div>
+                                <p class="mt-1 text-slate-700 dark:text-slate-300 whitespace-pre-wrap">${comment.text}</p>
+                            </div>
+                        `;
+                        commentsList.appendChild(commentEl);
+                    });
+                }
+            }, (error) => {
+                console.error("Error loading comments: ", error); // ពិនិត្យ Console របស់អ្នក
+                if (commentsLoading) commentsLoading.classList.add('hidden');
+                
+                if (error.code === 'failed-precondition') {
+                    console.error("FIREBASE INDEX MISSING (Collection group): You need to create a Collection Group index for 'comments'.");
+                    commentsList.innerHTML = '<p class="text-red-500">Error: Comments could not be loaded. (Admin: Index missing)</p>';
+                } else {
+                    commentsList.innerHTML = '<p class="text-red-500">Error loading comments. Please try again.</p>';
+                }
+            });
+        }
 
         // Function ទី៣៖ សម្រាប់ Update UI ពេល user Login/Logout
         function updateCommentSectionUI() {
@@ -1540,89 +1581,9 @@ int main() {
                 document.addEventListener('firebaseReady', () => updateVisitorCount(true), { once: true });
                 return;
             }
-
-            const db = window.firebaseDb;
-            // Use the imports from the window object
-             document.addEventListener('firebaseReady', () => {
-            console.log("Main App: 'firebaseReady' event received!");
-
-            // Now it's safe to get the global variables
-            const db = window.firebaseDb;
-            const auth = window.firebaseAuth;
-            const { 
-              doc, 
-              getDoc, 
-              setDoc, 
-              increment, 
-              serverTimestamp
-            } = window.firebaseFirestoreImports;
-            const { onAuthStateChanged } = window.authFunctions;
-
-            // Get the App ID
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-            // Get the UI element
-            const viewsElement = document.getElementById('visitor-count');
-
-            // --- CRITICAL STEP ---
-            // Wait for onAuthStateChanged to CONFIRM the user session is active.
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    // User is authenticated
-                    console.log("Main App: Auth state confirmed. User ID:", user.uid);
-                    // Now we can safely access Firestore
-                    initializePageViews(user.uid);
-                } else {
-                    // This should not happen if anon sign-in works
-                    console.error("Main App: Auth state error. User is null.");
-                    if (viewsElement) {
-                        viewsElement.textContent = 'Auth Error';
-                    }
-                }
-            });
-
-            // --- THIS IS YOUR "LAST SCRIPT", FIXED ---
-            async function initializePageViews(userId) {
-                
-                // Get necessary functions
-                const { doc, setDoc, increment, serverTimestamp, getDoc } = window.firebaseFirestoreImports;
-                
-                // --- THIS IS THE CRITICAL FIX ---
-                // Your original path was: doc(db, "siteStats", "pageViews")
-                // That path will be BLOCKED by security rules.
-                // The CORRECT path for this environment is:
-                const docPath = `artifacts/${appId}/public/data/siteStats/pageViews`;
-                const counterRef = doc(db, docPath); 
-                
-                console.log("Main App: Accessing Firestore at:", docPath);
-
-                try {
-                    // 1. Increment the count (your logic)
-                    await setDoc(counterRef, { 
-                        count: increment(1), 
-                        lastVisit: serverTimestamp() 
-                    }, { merge: true });
-
-                    // 2. Get the new count (your logic)
-                    const docSnap = await getDoc(counterRef);
-                    
-                    if (docSnap.exists()) {
-                        // Use viewsElement (which is getElementById('visitor-count'))
-                        viewsElement.textContent = docSnap.data().count.toLocaleString();
-                    } else {
-                        viewsElement.textContent = '1';
-                    }
-                } catch (error) {
-                    // This error will fire if your Security Rules are incorrect
-                    console.error('Error updating visitor count:', error.message);
-                    viewsElement.textContent = 'N/A';
-                    
-                    if (window.showDbErrorNotification) {
-                        window.showDbErrorNotification("Error loading page views. (Check Rules)");
-                    }
-                }
-            }
-        });
+            
+            // This function is defined inside 'firebaseReady' listener
+            // to ensure it runs *after* auth is confirmed.
         }
         
         // AI Tool Logic
@@ -1658,7 +1619,7 @@ int main() {
         
         async function getAiResponse(prompt) {
             // UPDATED: Use the environment-provided key by setting this to empty.
-            const apiKey = "AIzaSyBAeELo0ssbnSX2DOGKxkAyx9wAvrjikHs"; 
+            const apiKey = ""; 
             
             // This is the correct model to use
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
@@ -1890,19 +1851,73 @@ int main() {
         // --- Firebase Auth Listener ---
         // This is now triggered by the automatic sign-in in the <script type="module">
         document.addEventListener('firebaseReady', () => {
+            console.log("Main App: 'firebaseReady' event received!");
+
             const auth = window.firebaseAuth;
             const { onAuthStateChanged, signOut } = window.authFunctions;
+
+            // Get the UI element
+            const viewsElement = document.getElementById('visitor-count');
 
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     console.log("User is logged in:", user.uid);
                     updateUIAfterLogin(user);
+                     // Now we can safely access Firestore for visitor count
+                     initializePageViews(user.uid);
                 } else {
                     console.log("User is logged out.");
                     updateUIAfterLogout();
+                     // This should not happen if anon sign-in works
+                     console.error("Main App: Auth state error. User is null.");
+                     if (viewsElement) {
+                         viewsElement.textContent = 'Auth Error';
+                     }
                 }
             });
 
+            // --- THIS IS YOUR "LAST SCRIPT", FIXED ---
+            async function initializePageViews(userId) {
+                 if (!viewsElement) return; // Don't run if element not found
+                 
+                 // Get necessary functions
+                 const db = window.firebaseDb;
+                 const { doc, setDoc, increment, serverTimestamp, getDoc } = window.firebaseFirestoreImports;
+                 
+                 // --- THIS IS THE CRITICAL FIX ---
+                 // We use the `appId` defined at the top of the script
+                 const docPath = `artifacts/${appId}/public/data/siteStats/pageViews`;
+                 const counterRef = doc(db, docPath); 
+                 
+                 console.log("Main App: Accessing Firestore at:", docPath);
+
+                 try {
+                     // 1. Increment the count (your logic)
+                     await setDoc(counterRef, { 
+                         count: increment(1), 
+                         lastVisit: serverTimestamp() 
+                     }, { merge: true });
+
+                     // 2. Get the new count (your logic)
+                     const docSnap = await getDoc(counterRef);
+                     
+                     if (docSnap.exists()) {
+                         // Use viewsElement (which is getElementById('visitor-count'))
+                         viewsElement.textContent = docSnap.data().count.toLocaleString();
+                     } else {
+                         viewsElement.textContent = '1';
+                     }
+                 } catch (error) {
+                     // This error will fire if your Security Rules are incorrect
+                     console.error('Error updating visitor count:', error.message);
+                     viewsElement.textContent = 'N/A';
+                     
+                     if (window.showDbErrorNotification) {
+                         window.showDbErrorNotification("Error loading page views. (Check Rules)");
+                     }
+                 }
+            }
+            
             // --- Logout Button ---
             navLogoutBtns.forEach(btn => {
                 if(btn) btn.addEventListener('click', () => {
@@ -2115,7 +2130,7 @@ int main() {
             }
             
             // WARNING: Do not expose your Bot Token publicly.
-            const botToken = '8476586909:AAGrJEXbp2U5sUJ7s1MZF147sc70IqKpqIU'; // <-- DANGER! DO NOT PUT YOUR TOKEN HERE.
+            const botToken = 'YOUR_TELEGRAM_BOT_TOKEN_HERE'; // <-- DANGER! DO NOT PUT YOUR TOKEN HERE.
             const chatId = '1458220999'; 
 
             contactForm.addEventListener('submit', function(e) {
@@ -2174,6 +2189,3 @@ int main() {
     </script>
 </body>
 </html>
-
-
-
